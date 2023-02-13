@@ -33,7 +33,7 @@
 		      function get_columns()
 			    {
 			        $columns = array(
-			                // 'cb'            =>  '<input type="checkbox" />',
+			                'image'         => __('Image', 'supporthost-cookie-consent'),
 			                'name'          => __('Name', 'supporthost-cookie-consent'),
 			                'price'         => __('Price', 'supporthost-cookie-consent'),
 			                'category'      => __('Category', 'supporthost-cookie-consent'),
@@ -61,7 +61,9 @@
 
 				        public function get_sortable_columns()
 					    {
-					        return array('name'       => array('name', false),
+					        return array(
+					        	         'image'      => array('image',false),
+					        	         'name'       => array('name', false),
 					                     'category'   => array('category', false),
 					                     'tag'        => array('tag', false),
 					                     'price'      => array('price', false),
@@ -88,6 +90,9 @@
 
 				            foreach($post_info as $keyss=>$valuess)
 				            {
+                                $attachment_id = get_post_thumbnail_id( $valuess->ID);
+                                $url = wp_get_attachment_image_src($attachment_id, 'desired-size');
+
 				            	$cat_term=get_the_terms($valuess->ID,'product_cat');
 				            	foreach($cat_term as $cat_key=>$cat_value)
 				            	{
@@ -106,8 +111,9 @@
 				            	$stock=get_post_meta($valuess->ID,'_stock',true);
 
 				            	  $data[] = array(
-				                   
-				                    'name'       =>$valuess->post_title ,
+				                     
+				                    'image'      =>'<img src="'.$url[0].'" height="50" width="50">',
+				                    'name'       => $valuess->post_title,
 				                    'price'      => get_post_meta($data_id,'_price',true),
 				                    'category'   => $cat_name,
 				                    'tag'        => $tag_name,
@@ -123,8 +129,6 @@
 				    	
 
 
-				      
-
 				                    return $data;
 				    }
 
@@ -133,7 +137,7 @@
 				    function column_default($item, $column_name)
 					    {
 					          switch ($column_name) {
-					     
+					                case 'image':
 					                case 'name':
 					                case 'price':
 					                case 'category':
