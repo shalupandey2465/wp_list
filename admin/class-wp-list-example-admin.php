@@ -185,6 +185,9 @@ class Wp_List_Example_Admin {
 		               // $product->set_sku($file_content['sku']); 
 		               $product->update_meta_data( 'my_custom_meta_key', 'my data' );
 		               $product->set_image_id($imgs['attachement']);
+		               $product->set_stock_status( 'instock' );
+		               $product->set_manage_stock( true );
+		               $product->set_stock_quantity( 5 );
 		               $attributes = array();
 		               foreach($file_content['attributes'] as $attr_key => $attr_value)
 		               {
@@ -234,7 +237,10 @@ class Wp_List_Example_Admin {
 	               $product->update_meta_data( 'my_custom_meta_key', 'my data' );
 									 
 	                $product->set_image_id($imgs['attachement']);
-					
+		        $product->set_stock_status( 'instock' );
+	               $product->set_manage_stock( true );
+	               $product->set_stock_quantity( 5 );
+	               $attributes = array();
 	               $attributes = array();
 	               foreach($file_content['attributes'] as $attr_key => $attr_value)
 	               {
@@ -396,6 +402,10 @@ class Wp_List_Example_Admin {
 		                 $sample_product->set_sale_price($all_contentValue['sale_price']);
 		                // $product->set_sku($file_content['sku']); 
 		                $sample_product->update_meta_data( 'my_custom_meta_key', 'my data' );
+		                $sample_product->set_stock_status( 'instock' );
+		               $sample_product->set_manage_stock( true );
+		               $sample_product->set_stock_quantity( 5 );
+		               $attributes = array();
 		                $sample_product->set_image_id($var_imges['attachement']);
 		                $sample_attributes = array();
 		               foreach($all_contentValue['attributes'] as $attr_samplekey => $attr_samplevalue)
@@ -444,8 +454,12 @@ class Wp_List_Example_Admin {
 			               $variable_product->set_short_description($file_contentss['description'].''.$file_contentss['short_description']);
 			               // $product->set_sku($file_content['sku']); 
 			               $variable_product->update_meta_data( 'my_custom_meta_key', 'my data' );
+			               $variable_product->set_stock_status( 'instock' );
+			               $variable_product->set_manage_stock( true );
+			               $variable_product->set_stock_quantity( 5 );
+			            
 											 
-			               $sample_product->set_image_id($var_imges['attachement']);
+			               $variable_product->set_image_id($var_imges['attachement']);
 							
 			               $variable_attributes = array();
 			               foreach($file_contentss['attributes'] as $attr_variablekey => $attr_variablevalue)

@@ -88,13 +88,30 @@
 
 				            foreach($post_info as $keyss=>$valuess)
 				            {
+				            	$cat_term=get_the_terms($valuess->ID,'product_cat');
+				            	foreach($cat_term as $cat_key=>$cat_value)
+				            	{
+
+					            	$cat_name=$cat_value->name;
+					            	
+				            	}
+
+				            	$product_tag_term=get_the_terms($valuess->ID,'product_tag');
+				            	foreach($product_tag_term as $tag_key=>$tag_value)
+				            	{
+                                   
+                                    	$tag_name=$tag_value->name;
+                                   
+				            	}
+				            	$stock=get_post_meta($valuess->ID,'_stock',true);
+
 				            	  $data[] = array(
 				                   
 				                    'name'       =>$valuess->post_title ,
 				                    'price'      => get_post_meta($data_id,'_price',true),
-				                    'category'   => '1994',
-				                    'tag'        => 'Frank Darabont',
-				                    'stock'      => '9.3'
+				                    'category'   => $cat_name,
+				                    'tag'        => $tag_name,
+				                    'stock'      => $stock
 				                    );
 				            }
 
