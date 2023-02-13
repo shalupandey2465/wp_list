@@ -12,6 +12,7 @@
 			    function prepare_items()
 				    {
 				    	$data = $this->table_data();
+				    	usort( $data, array( &$this, 'sort_data' ) );
 				        $columns = $this->get_columns();
 				        $hidden = array();  
 				        $sortable = $this->get_sortable_columns();
@@ -78,6 +79,8 @@
 				    	 foreach($post_meta_info as $key=>$value)
 			     	     {
 			     	     	$data_id = $value['post_id'];
+					    	// print_r($price);
+					    	// die();
 			     	     	$post_info = $wpdb->get_results(
 				            "SELECT * FROM {$table} WHERE ID='".$data_id ."'"
 				            );
@@ -87,8 +90,8 @@
 				            {
 				            	  $data[] = array(
 				                   
-				                    'name'       =>$valuess->ID ,
-				                    'price'      => $valuess->post_title,
+				                    'name'       =>$valuess->post_title ,
+				                    'price'      => get_post_meta($data_id,'_price',true),
 				                    'category'   => '1994',
 				                    'tag'        => 'Frank Darabont',
 				                    'stock'      => '9.3'
@@ -132,6 +135,35 @@
 						                '<input type="checkbox" name="element[]" value="%s" />',
 						                $item['id']
 						        );
+						    }
+
+						    private function sort_data( $a, $b )
+						    {
+						        // Set defaults
+						        $orderby = 'name';
+						        $order = 'asc';
+
+						        // If orderby is set, use this as the sort column
+						        if(!empty($_GET['orderby']))
+						        {
+						            $orderby = $_GET['orderby'];
+						        }
+
+						        // If order is set use this as the order
+						        if(!empty($_GET['order']))
+						        {
+						            $order = $_GET['order'];
+						        }
+
+
+						        $result = strcmp( $a[$orderby], $b[$orderby] );
+
+						        if($order === 'asc')
+						        {
+						            return $result;
+						        }
+
+						        return -$result;
 						    }
 		}
 
