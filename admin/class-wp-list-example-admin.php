@@ -152,7 +152,9 @@ class Wp_List_Example_Admin {
 
 	public function get_product_by_id()
 	{
-	
+	        // ini_set('display_errors','1');
+		// ini_set('display_startup_errors','1');
+		// error_reporting(E_ALL);
 		$consumer_key     = $_POST['consumer_key'];
 		$consumer_secret  = $_POST['consumer_secret'];
 		$product_id       = $_POST['product_id'];
@@ -161,6 +163,7 @@ class Wp_List_Example_Admin {
 		$file_content      = json_decode($data,true);
 		$images            = $file_content['images'];
 		$imgs=array();
+		
                foreach($images as $img=>$im)
 		{
 
@@ -195,18 +198,28 @@ class Wp_List_Example_Admin {
 							$attributes[] = $attribute;
 							$product->set_attributes( $attributes );
 		               }
+                              $cat = array();
+                               foreach($file_content['categories']  as $file_key=>$file_value)
+                               {
+                               
+                                        $term_id=get_term_by('name',$file_value['name'], 'product_cat');
+                                        $cat[] = $term_id->term_id;
+			               	 $product->set_category_ids($cat);
 
-		               $product->save();
-		               // $categories=$file_content['categories'][0]['name'];
-		               //  if(term_exists($categories, 'product_cat'))
-			       //      {
-			       //      	$term_id=get_term_by('name',$categories, 'product_cat');
-			       //      	 wp_set_object_terms( $product->get_id(), $term_id->term_id,'product_cat');
-			       //   }
-			       //  else{
-			       //  	 $nameb = wp_insert_term($categories, 'product_cat');
-			       //        wp_set_object_terms( $product->get_id(), $nameb['term_id'],'product_cat');
-			       //   }
+                               }
+                                
+                                $tag = array();
+
+                                foreach($file_content['tags']  as $tags_key=>$tags_value)
+	                        {
+	                               
+	                                        $tags_term_id=get_term_by('name',$tags_value['name'], 'product_tag');
+	                                        $tag[] = $tags_term_id->term_id;
+				               	 $product->set_tag_ids($tag);
+
+	                         }
+                                $product->save();
+			       
 
 		}
 		else
@@ -236,17 +249,28 @@ class Wp_List_Example_Admin {
 						$product->set_attributes( $attributes );
 	               }
 
-	               $product->save();
-		               // $categories=$file_content['categories'][0]['name'];
-			       //          if(term_exists($categories, 'product_cat'))
-			// 	            {
-			// 	            	$term_id=get_term_by('name',$categories, 'product_cat');
-			// 	            	 wp_set_object_terms( $product->get_id(), $term_id->term_id,'product_cat');
-			// 	         }
-			// 	        else{
-			// 	        	 $nameb = wp_insert_term($categories, 'product_cat');
-			// 	              wp_set_object_terms( $product->get_id(), $nameb['term_id'],'product_cat');
-			// 	         }
+	               $cat = array();
+                               foreach($file_content['categories']  as $file_key=>$file_value)
+                               {
+                               
+                                        $term_id=get_term_by('name',$file_value['name'], 'product_cat');
+                                        $cat[] = $term_id->term_id;
+			               	 $product->set_category_ids($cat);
+
+                               }
+
+                               $tag = array();
+
+                                foreach($file_content['tags']  as $tags_key=>$tags_value)
+	                        {
+	                               
+	                                        $tags_term_id=get_term_by('name',$tags_value['name'], 'product_tag');
+	                                        $tag[] = $tags_term_id->term_id;
+				               	 $product->set_tag_ids($tag);
+
+	                         }
+
+                        $product->save();
 
 	               $variations_bulk=$file_content['variations'];
 			       foreach ($variations_bulk as $variation_key => $variation_value){
@@ -348,7 +372,7 @@ class Wp_List_Example_Admin {
 		foreach($file_contentss as $all_contentKey=>$all_contentValue)
 		{
 
-			  $imagess            = $all_contentValue['images'];
+			  $imagess  = $all_contentValue['images'];
 				$var_imges=array();
 
 		        foreach($imagess as $var_imge=>$var_imgs)
@@ -387,6 +411,27 @@ class Wp_List_Example_Admin {
 							$sample_product->set_attributes( $sample_attributes );
 		               }
 
+		                $cats = array();
+                               foreach($all_contentValue['categories']  as $cats_key=>$cats_value)
+                               {
+                               
+                                        $term_ids=get_term_by('name',$cats_value['name'], 'product_cat');
+                                        $cats[] = $term_ids->term_id;
+			               	$sample_product->set_category_ids($cats);
+
+                               }
+
+                                 $tags = array();
+
+                                foreach($all_contentValue['tags']  as $tagss_key=>$tagss_value)
+	                        {
+	                               
+	                                        $tagss_term_id=get_term_by('name',$tagss_value['name'], 'product_tag');
+	                                        $tags[] = $tagss_term_id->term_id;
+				               	 $sample_product->set_tag_ids($tags);
+
+	                         }
+
 		               $sample_product->save();
 
                  }
@@ -415,6 +460,27 @@ class Wp_List_Example_Admin {
 								$variable_attributes[] = $attribute;
 								$variable_product->set_attributes( $variable_attributes );
 			               }
+
+			                $cats = array();
+	                               foreach($file_contentss['categories']  as $cats_key=>$cats_value)
+	                               {
+	                               
+	                                        $term_ids=get_term_by('name',$cats_value['name'], 'product_cat');
+	                                        $cats[] = $term_ids->term_id;
+				               	$variable_product->set_category_ids($cats);
+
+	                               }
+
+	                                 $tags = array();
+
+	                                foreach($file_contentss['tags']  as $tagss_key=>$tagss_value)
+		                        {
+		                               
+		                                        $tagss_term_id=get_term_by('name',$tagss_value['name'], 'product_tag');
+		                                        $tags[] = $tagss_term_id->term_id;
+					               	 $variable_product->set_tag_ids($tags);
+
+		                         }
 
 			               $variable_product->save();
 			               $variations_bulkss=$file_contentss['variations'];
