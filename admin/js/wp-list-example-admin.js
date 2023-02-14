@@ -117,4 +117,24 @@ jQuery(document).ready(function(){
         }
     });
 
+    jQuery('#filter_data').on('click',function(){
+   
+             var filter_type = jQuery('.filter-type').val();
+             if( filter_type != '' ){
+            jQuery('.filter-type').parents('form').submit();   
+        }
+             
+     });
+
+     jQuery('.perform_onchange').on('change', function(){
+        var filter_type_name = jQuery(this).val();
+        console.log(filter_type_name);
+        // if( filter_type_name != '' ){
+        //     jQuery(this).parents('form').submit();
+        //     // document.location.href = 'admin.php?page=product-type'+product_type;    
+        // }
+    });
+
   });
+
+

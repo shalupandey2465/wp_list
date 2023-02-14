@@ -74,6 +74,10 @@ class Supporthost_List_Table extends WP_List_Table
 	}
 
 
+
+	
+
+
 	function table_data()
 	{
 
@@ -197,27 +201,77 @@ class Supporthost_List_Table extends WP_List_Table
 	}
 	function extra_tablenav($which)
 	{
+		
+		$filter_type=$_POST['filter-type'];
+		if($filter_type=='categories')
+		{
+			$args = array(
+				'taxonomy'     => 'product_cat',
+				'orderby'      => 'name',
+				'show_count'   => 0,
+				'pad_counts'   => 0,
+				'hierarchical' => 1,
+				'title_li'     => '',
+				'hide_empty'   => 0
+			);
+			$all_categories = get_categories( $args );
+
+
+		}
+		else if($filter_type=='tags')
+		{
+
+			$args = array(
+				'taxonomy'     => 'product_tag',
+				'orderby'      => 'name',
+				'show_count'   => 0,
+				'pad_counts'   => 0,
+				'hierarchical' => 1,
+				'title_li'     => '',
+				'hide_empty'   => 0
+			);
+			$all_categories = get_categories( $args );
+
+		}
+
 		if ($which == "top") {
 			?>
 			
 			<div class="alignleft actions bulkactions">
 				<form action="<?php echo $_SERVER['REQUEST_URI'] ?>" method="post">
-					<select name="product-type" class="product-type">
-						<option <?= selected( $_REQUEST['product-type'], 'all', false ) ?> value="all">All</option>
-						<option <?= selected( $_REQUEST['product-type'], 'simple', false ) ?> value="simple">Simple Product</option>
-						<option <?= selected( $_REQUEST['product-type'], 'variable', false ) ?> value="variable">Variable Product</option>
+					<select name="filter-type" class="filter-type">
+						<option <?= selected( $_REQUEST['filter-type'], 'all', false ) ?> value="all">All</option>
+						<option <?= selected( $_REQUEST['filter-type'], 'categories', false ) ?> value="categories">Categories</option>
+						<option <?= selected( $_REQUEST['filter-type'], 'tags', false ) ?> value="tags">Tags</option>
+						<option <?= selected( $_REQUEST['filter-type'], 'product_type', false ) ?> value="product type">Product Type</option>
+						<option <?= selected( $_REQUEST['filter-type'], 'stock_status', false ) ?> value="stock status">Stock Status</option>
 					</select>
+					<select class="perform_onchange">
+
+						<?php
+						foreach($all_categories as $cat_data)
+						{
+							?>
+							<option name="option_value" value="<?php echo $cat_data->cat_name?>"><?php echo $cat_data->cat_name?></option>
+							<?php
+						}
+						?>
+					</select>
+					<input type="button" name="filter_data" id="filter_data" value="Apply">
+					<div id="render_filter_type">
+					</div>
 				</form>
-			</div>
-			<?php
+				<form>
+				</div>
+				<?php
+			}
 		}
 	}
-}
 
 
-$myListTable = new Supporthost_List_Table();
-echo '<div class="wrap"><h2>My List Table Test</h2>';
-$myListTable->prepare_items();
-$myListTable->display();
-echo '</div>';
+	$myListTable = new Supporthost_List_Table();
+	echo '<div class="wrap"><h2>My List Table Test</h2>';
+	$myListTable->prepare_items();
+	$myListTable->display();
+	echo '</div>';
 ?>
