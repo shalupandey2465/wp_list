@@ -152,9 +152,9 @@ class Wp_List_Example_Admin {
 
 	public function get_product_by_id()
 	{
-	        // ini_set('display_errors','1');
-		// ini_set('display_startup_errors','1');
-		// error_reporting(E_ALL);
+	        ini_set('display_errors','1');
+		ini_set('display_startup_errors','1');
+		error_reporting(E_ALL);
 		$consumer_key     = $_POST['consumer_key'];
 		$consumer_secret  = $_POST['consumer_secret'];
 		$product_id       = $_POST['product_id'];
