@@ -411,14 +411,14 @@ class Wp_List_Example_Admin {
 		               foreach($all_contentValue['attributes'] as $attr_samplekey => $attr_samplevalue)
 		               {
 		                   
-							$sample_attribute = new WC_Product_Attribute();
-							$sample_attribute->set_name( $attr_samplevalue['name']);
-							$sample_attribute->set_options($attr_samplevalue['options']);
-							$sample_attribute->set_position( 0 );
-							$sample_attribute->set_visible( true );
-							$sample_attribute->set_variation( true );
-							$sample_attributes[] = $sample_attribute;
-							$sample_product->set_attributes( $sample_attributes );
+										$sample_attribute = new WC_Product_Attribute();
+										$sample_attribute->set_name( $attr_samplevalue['name']);
+										$sample_attribute->set_options($attr_samplevalue['options']);
+										$sample_attribute->set_position( 0 );
+										$sample_attribute->set_visible( true );
+										$sample_attribute->set_variation( true );
+										$sample_attributes[] = $sample_attribute;
+										$sample_product->set_attributes( $sample_attributes );
 		               }
 
 		                $cats = array();

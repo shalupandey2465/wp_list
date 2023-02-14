@@ -77,7 +77,7 @@ class Supporthost_List_Table extends WP_List_Table
 	
 
 
-	function table_data()
+	public function table_data()
 	{
 
 		global $wpdb;
@@ -85,6 +85,7 @@ class Supporthost_List_Table extends WP_List_Table
 		$data = array();
 		$category=array();
 		$tag=array();
+		$stock_status=array();
 		$variation = [];
 		$post_meta_info = $this->get_table_data();
 		foreach ($post_meta_info as $key => $value) {
@@ -116,6 +117,26 @@ class Supporthost_List_Table extends WP_List_Table
 					'posts_per_page' => 3  
 				); 
 
+				// print_r($_POST['option_value']);
+				// var_dump(isset($_POST['option_value']));
+				var_dump($_POST['option_value']);
+
+				if( isset( $_REQUEST['option_value']) && $_REQUEST['option_value'] != '' && $_POST['filter-type']=='product') {
+					$argsss = array(
+						'post_status' => 'publish',
+						'tax_query' => array(
+							array(
+								'taxonomy' => 'product_type',
+								'field'    => 'term_id',
+								'terms'     =>  $_POST['option_value'],
+								'operator'  => 'IN'
+							)
+						)
+					);
+					$the_queryss = new wp_query($argsss);
+					print_r($the_queryss);
+				}
+				
 				if($_POST['option_value'] != '' && $_POST['filter-type']=='categories')
 				{
 					$args = array(
@@ -146,6 +167,7 @@ class Supporthost_List_Table extends WP_List_Table
 				}
 				else if($_POST['option_value'] != '' && $_POST['filter-type']=='tags')
 				{
+
 					$args = array(
 						'post_status' => 'publish',
 						'tax_query' => array(
@@ -173,6 +195,39 @@ class Supporthost_List_Table extends WP_List_Table
 					);
 					
 				}
+				else if(isset($_POST['option_value']) && isset( $_POST['filter-type'] )  )
+				{
+
+					// print_r($_POST['option_value']);
+					$myquery = array(
+						'post_type'  => 'product',
+						'meta_key'   => '_stock_status',
+						'meta_value' => $_POST['option_value'],
+						'order'      => 'ASC'
+					);
+					$the_query = get_posts($myquery);
+					$term_obj_list = get_the_terms( $the_query[0]->ID, 'product_cat' );
+					$attachment_idss = get_post_thumbnail_id($the_query[0]->ID);
+					$urlss = wp_get_attachment_image_src($attachment_idss, 'desired-size');
+					$stock_status[]=array(
+						'image'      => '<img src="' . $urlss[0] . '" height="50" width="50">',
+						'name'       => $the_query[0]->post_title,
+						'price'      => get_post_meta($the_query[0]->ID, '_price', true),
+						'category'   => $term_obj_list[0]->name,
+						'tag'        => '',
+						'stock'      => get_post_meta($the_query[0]->ID, '_stock_status', true)
+					);
+					
+
+				}
+				// elseif( isset( $_REQUEST['option_value']) && 'simple' == $_REQUEST['option_value'] ) {
+				// 	//echo "you were here";
+				// 	echo $_REQUEST['option_value'];
+				// 	echo "<br>";
+				// 	die('hii');
+				// }
+
+				// echo "<br> Optoin value was :- " .$_POST['option_value'] ;
 				
 				
 				$data[]=array(
@@ -199,12 +254,17 @@ class Supporthost_List_Table extends WP_List_Table
 		{
 			return $tag;
 		}
+		else if(isset($_POST['option_value']) && isset( $_POST['filter-type'] )  )
+		{
+			return $stock_status;
+		}
+
 		return $data;
 	}
 
 
 
-	function column_default($item, $column_name)
+	public function column_default($item, $column_name)
 	{
 		switch ($column_name) {
 			case 'image':
@@ -220,7 +280,7 @@ class Supporthost_List_Table extends WP_List_Table
 
 
 
-	function column_cb($item)
+	public function column_cb($item)
 	{
 		return sprintf(
 			'<input type="checkbox" name="element[]" value="%s" />',
@@ -253,11 +313,10 @@ class Supporthost_List_Table extends WP_List_Table
 
 		return $result;
 	}
-	function extra_tablenav($which)
+	public function extra_tablenav($which)
 	{
 		
 		$filter_type=$_POST['filter-type'];
-
 		if($filter_type=='categories')
 		{
 			$args = array(
@@ -270,9 +329,10 @@ class Supporthost_List_Table extends WP_List_Table
 				'hide_empty'   => 0
 			);
 			$all_categories = get_categories( $args );
+
 			// print_r($all_categories[0]->term_id);
 
-	        
+
 
 		}
 		else if($filter_type=='tags')
@@ -294,13 +354,17 @@ class Supporthost_List_Table extends WP_List_Table
 		{
 			
 			global $wpdb;
-		    $table = $wpdb->prefix . 'postmeta';
-		    $all_categoriess =  $wpdb->get_results(
-			       "SELECT * FROM {$table} WHERE meta_key='_stock_status' LIMIT 1"
-		     );
-
+			$table = $wpdb->prefix . 'postmeta';
+			$all_categoriess =  $wpdb->get_results(
+				"SELECT * FROM {$table} WHERE meta_key='_stock_status' LIMIT 1"
+			);
 			
-				
+		}
+		else if($filter_type=='product')
+		{
+
+			$product_types = get_terms( 'product_type', array( 'hide_empty' => false ) );
+
 			
 			
 		}
@@ -314,31 +378,42 @@ class Supporthost_List_Table extends WP_List_Table
 						<option <?= selected( $_REQUEST['filter-type'], 'all', false ) ?> value="all">All</option>
 						<option <?= selected( $_REQUEST['filter-type'], 'categories', false ) ?> value="categories">Categories</option>
 						<option <?= selected( $_REQUEST['filter-type'], 'tags', false ) ?> value="tags">Tags</option>
-						<option <?= selected( $_REQUEST['filter-type'], 'product_type', false ) ?> value="product type">Product Type</option>
+						<option <?= selected( $_REQUEST['filter-type'], 'product', false ) ?> value="product">Product Type</option>
 						<option <?= selected( $_REQUEST['filter-type'], 'stock_status', false ) ?> value="stock status">Stock Status</option>
 					</select>
 					<select class="perform_onchange" name="option_value">
 
 						<?php
 						if(term_exists($all_categories[0]->term_id))
-	                     {
+						{
 							foreach($all_categories as $cat_data)
 							{
 								?>
 								<option  value="<?php echo $cat_data->term_id ?>"><?php echo $cat_data->cat_name?></option>
 								<?php
 							}
-						 }
-						 else{
-                                foreach($all_categoriess as $stock_status)
-							    {
-						 	?>
-                                      <option  value="<?php echo $stock_status->meta_value ?>"><?php echo $stock_status->meta_value ?></option>
-                                      <option value="outofstock">Out of Stock</option>
-						 	<?php
+						}
+						else if(isset($all_categoriess[0]->meta_value)){
+							
+							foreach($all_categoriess as $stock_status)
+							{
+								?>
+								<option value="outofstock">Out Of Stock</option>
+								<option  value="<?php echo $stock_status->meta_value ?>"><?php echo $stock_status->meta_value ?></option>
+								<?php
 
-						        }
-						 }
+							}
+						}
+						else
+						{
+							foreach($product_types as $product_types_name)
+							{
+								?>
+								<option  value="<?php echo $product_types_name->term_id ?>"><?php echo $product_types_name->name ?></option>
+								<?php
+							}
+
+						}
 						?>
 					</select>
 					<input type="button" name="filter_data" id="filter_data" value="Apply">
