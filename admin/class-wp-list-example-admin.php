@@ -237,7 +237,7 @@ class Wp_List_Example_Admin {
 	               $product->update_meta_data( 'my_custom_meta_key', 'my data' );
 									 
 	                $product->set_image_id($imgs['attachement']);
-		        $product->set_stock_status( 'instock' );
+		             $product->set_stock_status( 'instock' );
 	               $product->set_manage_stock( true );
 	               $product->set_stock_quantity( 5 );
 	               $attributes = array();
@@ -402,7 +402,7 @@ class Wp_List_Example_Admin {
 		                 $sample_product->set_sale_price($all_contentValue['sale_price']);
 		                // $product->set_sku($file_content['sku']); 
 		                $sample_product->update_meta_data( 'my_custom_meta_key', 'my data' );
-		                $sample_product->set_stock_status( 'instock' );
+		                $sample_product->set_stock_status( 'outofstock' );
 		               $sample_product->set_manage_stock( true );
 		               $sample_product->set_stock_quantity( 5 );
 		               $attributes = array();

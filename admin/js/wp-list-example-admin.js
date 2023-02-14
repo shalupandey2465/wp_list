@@ -118,11 +118,16 @@ jQuery(document).ready(function(){
     });
 
     jQuery('.filter-type').on('change',function(){
+
+          // alert('hi');
    
              var filter_type = jQuery(this).val();
+             console.log(filter_type);
+
              if( filter_type != '' ){
             jQuery(this).parents('form').submit();   
         }
+
              
      });
 

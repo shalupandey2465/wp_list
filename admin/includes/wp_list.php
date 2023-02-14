@@ -257,6 +257,7 @@ class Supporthost_List_Table extends WP_List_Table
 	{
 		
 		$filter_type=$_POST['filter-type'];
+
 		if($filter_type=='categories')
 		{
 			$args = array(
@@ -269,8 +270,9 @@ class Supporthost_List_Table extends WP_List_Table
 				'hide_empty'   => 0
 			);
 			$all_categories = get_categories( $args );
+			// print_r($all_categories[0]->term_id);
 
-
+	        
 
 		}
 		else if($filter_type=='tags')
@@ -288,8 +290,18 @@ class Supporthost_List_Table extends WP_List_Table
 			$all_categories = get_categories( $args );
 
 		}
-		else if($filter_type=='stock_status')
+		else if($filter_type=='stock status')
 		{
+			
+			global $wpdb;
+		    $table = $wpdb->prefix . 'postmeta';
+		    $all_categoriess =  $wpdb->get_results(
+			       "SELECT * FROM {$table} WHERE meta_key='_stock_status' LIMIT 1"
+		     );
+
+			
+				
+			
 			
 		}
 
@@ -308,12 +320,25 @@ class Supporthost_List_Table extends WP_List_Table
 					<select class="perform_onchange" name="option_value">
 
 						<?php
-						foreach($all_categories as $cat_data)
-						{
-							?>
-							<option  value="<?php echo $cat_data->term_id ?>"><?php echo $cat_data->cat_name?></option>
-							<?php
-						}
+						if(term_exists($all_categories[0]->term_id))
+	                     {
+							foreach($all_categories as $cat_data)
+							{
+								?>
+								<option  value="<?php echo $cat_data->term_id ?>"><?php echo $cat_data->cat_name?></option>
+								<?php
+							}
+						 }
+						 else{
+                                foreach($all_categoriess as $stock_status)
+							    {
+						 	?>
+                                      <option  value="<?php echo $stock_status->meta_value ?>"><?php echo $stock_status->meta_value ?></option>
+                                      <option value="outofstock">Out of Stock</option>
+						 	<?php
+
+						        }
+						 }
 						?>
 					</select>
 					<input type="button" name="filter_data" id="filter_data" value="Apply">
