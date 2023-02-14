@@ -117,22 +117,23 @@ jQuery(document).ready(function(){
         }
     });
 
-    jQuery('#filter_data').on('click',function(){
+    jQuery('.filter-type').on('change',function(){
    
-             var filter_type = jQuery('.filter-type').val();
+             var filter_type = jQuery(this).val();
              if( filter_type != '' ){
-            jQuery('.filter-type').parents('form').submit();   
+            jQuery(this).parents('form').submit();   
         }
              
      });
 
-     jQuery('.perform_onchange').on('change', function(){
-        var filter_type_name = jQuery(this).val();
+     jQuery('#filter_data').on('click', function(){
+        var filter_type_name = jQuery('.perform_onchange').val();
         console.log(filter_type_name);
-        // if( filter_type_name != '' ){
-        //     jQuery(this).parents('form').submit();
-        //     // document.location.href = 'admin.php?page=product-type'+product_type;    
-        // }
+        if( filter_type_name != '' ){
+
+            jQuery('#filter_data').parents('form').submit();
+            // document.location.href = 'admin.php?page=product-type'+product_type;    
+        }
     });
 
   });

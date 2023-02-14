@@ -38,8 +38,7 @@ class Supporthost_List_Table extends WP_List_Table
 			'price'         => __('Price', 'supporthost-cookie-consent'),
 			'category'      => __('Category', 'supporthost-cookie-consent'),
 			'tag'           => __('Tag', 'supporthost-cookie-consent'),
-			'stock'         => __('Stock', 'supporthost-cookie-consent'),
-			'type'         	=> __('variable', 'supporthost-cookie-consent'),
+			'stock'         => __('Stock', 'supporthost-cookie-consent')
 
 		);
 		return $columns;
@@ -84,6 +83,8 @@ class Supporthost_List_Table extends WP_List_Table
 		global $wpdb;
 		$table = $wpdb->prefix . 'posts';
 		$data = array();
+		$category=array();
+		$tag=array();
 		$variation = [];
 		$post_meta_info = $this->get_table_data();
 		foreach ($post_meta_info as $key => $value) {
@@ -106,45 +107,99 @@ class Supporthost_List_Table extends WP_List_Table
 				foreach ($product_tag_term as $tag_key => $tag_value) {
 					$tag_name = $tag_value->name;
 				}
+
 				$stock = get_post_meta($post_info->ID, '_stock', true);
 				$product = wc_get_product($post_info->ID);
 				$product_parent = $product->get_parent_id();
+				$args = array(
+					'category_name' => $_POST['option_value'], 
+					'posts_per_page' => 3  
+				); 
 
-				if ($product_parent == 0) {
-					$product = wc_get_product($post_info->ID);
+				if($_POST['option_value'] != '' && $_POST['filter-type']=='categories')
+				{
+					$args = array(
+						'post_status' => 'publish',
+						'tax_query' => array(
+							array(
+								'taxonomy' => 'product_cat',
+								'field'    => 'term_id',
+								'terms'     =>  $_POST['option_value'],
+								'operator'  => 'IN'
+							)
+						)
+					);
+					$the_query = new wp_query($args);
+					$term = get_term_by('term_id',$_POST['option_value'], 'product_cat'); 
+					$name = $term->name;
+					$attachment_ids = get_post_thumbnail_id($the_query->posts[0]->ID);
+					$urls = wp_get_attachment_image_src($attachment_ids, 'desired-size');
 
-					if ($product->get_type() == $_POST['product-type']) {
-						$variation[] = array(
-
-							'image'      => '<img src="' . $url[0] . '" height="50" width="50">',
-							'name'       => $post_info->post_title,
-							'price'      => get_post_meta($data_id, '_price', true),
-							'category'   => $cat_name,
-							'tag'        => $tag_name,
-							'stock'      => $stock,
-							'type' 		=> $product->get_type()
-						);
-					} else {
-						$simple[] = array(
-
-							'image'      => '<img src="' . $url[0] . '" height="50" width="50">',
-							'name'       => $post_info->post_title,
-							'price'      => get_post_meta($data_id, '_price', true),
-							'category'   => $cat_name,
-							'tag'        => $tag_name,
-							'stock'      => $stock,
-							'type' 		=> $product->get_type()
-						);
-					}
+					$category[]=array(
+						'image'      => '<img src="' . $urls[0] . '" height="50" width="50">',
+						'name'       => $the_query->posts[0]->post_title,
+						'price'      => get_post_meta($the_query->posts[0]->ID, '_price', true),
+						'category'   => $name,
+						'tag'        => '',
+						'stock'      => get_post_meta($the_query->posts[0]->ID, '_stock', true)
+					);
 				}
+				else if($_POST['option_value'] != '' && $_POST['filter-type']=='tags')
+				{
+					$args = array(
+						'post_status' => 'publish',
+						'tax_query' => array(
+							array(
+								'taxonomy' => 'product_tag',
+								'field'    => 'term_id',
+								'terms'     =>  $_POST['option_value'],
+								'operator'  => 'IN'
+							)
+						)
+					);
+					$the_query = new wp_query($args);
+					$term = get_term_by('term_id',$_POST['option_value'], 'product_tag'); 
+					$name = $term->name;
+					$attachment_ids = get_post_thumbnail_id($the_query->posts[0]->ID);
+					$urls = wp_get_attachment_image_src($attachment_ids, 'desired-size');
+
+					$tag[]=array(
+						'image'      => '<img src="' . $urls[0] . '" height="50" width="50">',
+						'name'       => $the_query->posts[0]->post_title,
+						'price'      => get_post_meta($the_query->posts[0]->ID, '_price', true),
+						'category'   => '',
+						'tag'        => $name,
+						'stock'      => get_post_meta($the_query->posts[0]->ID, '_stock', true)
+					);
+					
+				}
+				
+				
+				$data[]=array(
+					'image'      => '<img src="' . $url[0] . '" height="50" width="50">',
+					'name'       => $post_info->post_title,
+					'price'      => get_post_meta($data_id, '_price', true),
+					'category'   => $cat_name,
+					'tag'        => $tag_name,
+					'stock'      => $stock
+				);
 			}
 		}
 
 
-		if (isset($_POST['product-type']) && $_POST['product-type'] != 'all') {
-			return $variation;
+		// if (isset($_POST['product-type']) && $_POST['product-type'] != 'all') {
+		// 	return $variation;
+		// }
+		// return array_merge($variation, $simple);
+		if($_POST['option_value'] != '' && $_POST['filter-type']=='categories')
+		{
+			return  $category;
 		}
-		return array_merge($variation, $simple);
+		else if($_POST['option_value'] != '' && $_POST['filter-type']=='tags')
+		{
+			return $tag;
+		}
+		return $data;
 	}
 
 
@@ -158,7 +213,6 @@ class Supporthost_List_Table extends WP_List_Table
 			case 'category':
 			case 'tag':
 			case 'stock':
-			case 'type':
 			default:
 			return $item[$column_name];
 		}
@@ -217,6 +271,7 @@ class Supporthost_List_Table extends WP_List_Table
 			$all_categories = get_categories( $args );
 
 
+
 		}
 		else if($filter_type=='tags')
 		{
@@ -233,6 +288,10 @@ class Supporthost_List_Table extends WP_List_Table
 			$all_categories = get_categories( $args );
 
 		}
+		else if($filter_type=='stock_status')
+		{
+			
+		}
 
 		if ($which == "top") {
 			?>
@@ -246,13 +305,13 @@ class Supporthost_List_Table extends WP_List_Table
 						<option <?= selected( $_REQUEST['filter-type'], 'product_type', false ) ?> value="product type">Product Type</option>
 						<option <?= selected( $_REQUEST['filter-type'], 'stock_status', false ) ?> value="stock status">Stock Status</option>
 					</select>
-					<select class="perform_onchange">
+					<select class="perform_onchange" name="option_value">
 
 						<?php
 						foreach($all_categories as $cat_data)
 						{
 							?>
-							<option name="option_value" value="<?php echo $cat_data->cat_name?>"><?php echo $cat_data->cat_name?></option>
+							<option  value="<?php echo $cat_data->term_id ?>"><?php echo $cat_data->cat_name?></option>
 							<?php
 						}
 						?>
