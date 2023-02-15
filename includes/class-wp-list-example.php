@@ -158,9 +158,9 @@ class Wp_List_Example {
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
 		$this->loader->add_action( 'admin_menu',$plugin_admin, 'wpdocs_register_my_custom_menu_page' );
 		$this->loader->add_action( "wp_ajax_nopriv_get_product_by_id",$plugin_admin,'get_product_by_id');
-        $this->loader->add_action( "wp_ajax_get_product_by_id",$plugin_admin,'get_product_by_id');
-        $this->loader->add_action( "wp_ajax_nopriv_get_all_product",$plugin_admin,'get_all_product');
-        $this->loader->add_action( "wp_ajax_get_all_product",$plugin_admin,'get_all_product');
+		$this->loader->add_action( "wp_ajax_get_product_by_id",$plugin_admin,'get_product_by_id');
+		$this->loader->add_action( "wp_ajax_nopriv_get_all_product",$plugin_admin,'get_all_product');
+		$this->loader->add_action( "wp_ajax_get_all_product",$plugin_admin,'get_all_product');
 
 	}
 

@@ -37,7 +37,6 @@ jQuery(document).ready(function(){
     jQuery('#exampleCheck1').on('click',function(){
 
         var checkbox=jQuery('#exampleCheck1:checked').val();
-        console.log(checkbox);
         if(checkbox == 'on')
         {
             jQuery('#productId').hide();
@@ -49,98 +48,109 @@ jQuery(document).ready(function(){
         
     });
 
-   
+
 
 });
 
 jQuery(document).ready(function(){
   jQuery('#wp_List_Example').on('click',function(e){
 
-         e.preventDefault();
-        var checkbox=jQuery('#exampleCheck1:checked').val();
-        console.log(checkbox);
-        if(checkbox=='on')
+   e.preventDefault();
+   var checkbox=jQuery('#exampleCheck1:checked').val();
+   console.log(checkbox);
+   if(checkbox=='on')
+   {
+
+    var consumer_key=jQuery('#consumer_key').val();
+    var consumer_secret=jQuery('#consumer_secret').val();
+    jQuery.ajax({
+
+        url  : 'admin-ajax.php',
+        type :  'post',
+        data :{
+           'action'        : 'get_all_product',
+           consumer_key    : consumer_key,
+           consumer_secret : consumer_secret
+
+       },
+       success:function(result){
+        var msg='';
+        if(result)
         {
+           msg= '<div class="notice notice-success is-dismissible my_notice"><p><strong>SUCCESS: </strong>Product Imported successfully</p><button type="button" class="notice-dismiss" onclick="javascript: return px_dissmiss_notice(this);"><span class="screen-reader-text">Dismiss this notice.</span></button></div>';
+       }
+       jQuery('.show_notice').html(msg);
+   }
 
-            var consumer_key=jQuery('#consumer_key').val();
-            var consumer_secret=jQuery('#consumer_secret').val();
-            jQuery.ajax({
+});
+}
+else
+{
 
-                url  : 'admin-ajax.php',
-                type :  'post',
-                data :{
-                         'action'        : 'get_all_product',
-                         consumer_key    : consumer_key,
-                         consumer_secret : consumer_secret
 
-                      },
-                      sucees:function(result){
 
-                      }
+    var consumer_key=jQuery('#consumer_key').val();
+    var consumer_secret=jQuery('#consumer_secret').val();
+    var product_id=jQuery('#product_id').val();
+    jQuery.ajax({
 
-              });
-        }
-        else
-        {
+        url  : 'admin-ajax.php',
+        type :  'post',
+        data :{
+           'action'        : 'get_product_by_id',
+           consumer_key    : consumer_key,
+           consumer_secret : consumer_secret,
+           product_id      : product_id
 
-            var consumer_key=jQuery('#consumer_key').val();
-            var consumer_secret=jQuery('#consumer_secret').val();
-            var product_id=jQuery('#product_id').val();
-            jQuery.ajax({
+       },
+       success:function(result){
+           var msg='';
+           if(result)
+           {
+               msg= '<div class="notice notice-success is-dismissible my_notice"><p><strong>SUCCESS: </strong>Product Imported successfully</p><button type="button" class="notice-dismiss" onclick="javascript: return px_dissmiss_notice(this);"><span class="screen-reader-text">Dismiss this notice.</span></button></div>';
+           }
+           jQuery('.show_notice').html(msg);
+       }
 
-                url  : 'admin-ajax.php',
-                type :  'post',
-                data :{
-                         'action'        : 'get_product_by_id',
-                         consumer_key    : consumer_key,
-                         consumer_secret : consumer_secret,
-                         product_id      : product_id
+   });
+}
 
-                      },
-                      sucees:function(result){
 
-                      }
 
-            });
-        }
-        
-        
-        
 
-    });
+});
 
-    jQuery('.product-type').on('change', function(){
-        var product_type = jQuery(this).val();
-        if( product_type != '' ){
-            jQuery(this).parents('form').submit();
+  jQuery('.product-type').on('change', function(){
+    var product_type = jQuery(this).val();
+    if( product_type != '' ){
+        jQuery(this).parents('form').submit();
             // document.location.href = 'admin.php?page=product-type'+product_type;    
-        }
-    });
+    }
+});
 
-    jQuery('.filter-type').on('change',function(){
+  jQuery('.filter-type').on('change',function(){
 
-          // alert('hi');
-   
-             var filter_type = jQuery(this).val();
-             console.log(filter_type);
 
-             if( filter_type != '' ){
-            jQuery(this).parents('form').submit();   
-        }
 
-             
-     });
+   var filter_type = jQuery(this).val();
 
-     jQuery('#filter_data').on('click', function(){
-        var filter_type_name = jQuery('.perform_onchange').val();
-        console.log(filter_type_name);
-        if( filter_type_name != '' ){
 
-            jQuery('#filter_data').parents('form').submit();
-            // document.location.href = 'admin.php?page=product-type'+product_type;    
-        }
-    });
+   if( filter_type != '' ){
+    jQuery(this).parents('form').submit();   
+}
 
-  });
+
+});
+
+  jQuery('#filter_data').on('click', function(){
+    var filter_type_name = jQuery('.perform_onchange').val();
+
+    if( filter_type_name != '' ){
+
+        jQuery('#filter_data').parents('form').submit();   
+    }
+});
+
+});
 
 

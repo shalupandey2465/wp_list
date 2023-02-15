@@ -119,6 +119,7 @@ class Wp_List_Example_Admin {
 	public function my_custom_menu_page()
 	{
 		echo '
+		<div class="show_notice"></div>
 		<div class="card">
 		<div class="card-body">
 		<form action="" method="post">
@@ -152,9 +153,7 @@ class Wp_List_Example_Admin {
 
 	public function get_product_by_id()
 	{
-		ini_set('display_errors','1');
-		ini_set('display_startup_errors','1');
-		error_reporting(E_ALL);
+		
 		$consumer_key     = $_POST['consumer_key'];
 		$consumer_secret  = $_POST['consumer_secret'];
 		$product_id       = $_POST['product_id'];
@@ -222,7 +221,13 @@ class Wp_List_Example_Admin {
 
 			}
 			$product->save();
-
+			if($product->get_id() !='')
+			{
+				echo json_encode(array('success' => true, 'message' => 'single product inserted'));
+				
+				
+			}
+			  
 
 		}
 		else
@@ -299,6 +304,13 @@ class Wp_List_Example_Admin {
 
 			}
 
+			if($product->get_id() !='')
+			{
+				echo json_encode(array('success' => true, 'message' => 'single product inserted'));
+				
+				
+			}
+
 
 
 		}
@@ -370,9 +382,9 @@ class Wp_List_Example_Admin {
 
 	public function get_all_product()
 	{
-		ini_set('display_errors','1');
-		ini_set('display_startup_errors','1');
-		error_reporting(E_ALL);
+		// ini_set('display_errors','1');
+		// ini_set('display_startup_errors','1');
+		// error_reporting(E_ALL);
 		$consumer_key      = $_POST['consumer_key'];
 		$consumer_secret   = $_POST['consumer_secret'];
 		$fetch_all_product = $this->fetch_all_products($consumer_key,$consumer_secret);
@@ -387,8 +399,6 @@ class Wp_List_Example_Admin {
 			foreach($imagess as $var_imge=>$var_imgs)
 			{
 
-        // print_r($var_imgs['src']);
-        // die();
 				$var_imges['attachement']=$this->get_image($var_imgs['src']);		
 
 
@@ -470,6 +480,12 @@ class Wp_List_Example_Admin {
 				}
 
 				$sample_product->save();
+				if($sample_product->get_id() !='')
+					{
+						echo json_encode(array('success' => true, 'message' => 'single product inserted'));
+						
+						
+					}
 
 			}
 			else
@@ -501,7 +517,7 @@ class Wp_List_Example_Admin {
 					$variable_attributes[] = $variable_attribute;
 					$variable_product->set_attributes( $variable_attributes );
 				}
-				// $variable_product->save();
+			
 
 				$cats = array();
 				foreach($all_contentValue['categories']  as $cats_key=>$cats_value)
@@ -528,7 +544,7 @@ class Wp_List_Example_Admin {
 				foreach($all_contentValue['tags']  as $tagss_key=>$tagss_value)
 				{
 
-						
+
 					if(term_exists($tagss_value['name'], 'product_tag'))
 					{
 						$tag_term_id=get_term_by('name',$tagss_value['name'], 'product_tag');
@@ -546,8 +562,6 @@ class Wp_List_Example_Admin {
 				}
 
 				$variable_product->save();
-				// print_r($all_contentValue['variations']);
-				// die();
 				$variations_bulkss=$all_contentValue['variations'];
 				foreach ($variations_bulkss as $variation_keyss => $variation_valuess){
 
@@ -567,10 +581,17 @@ class Wp_List_Example_Admin {
 					$variationss->save();
 
 				}
+
+				if($variable_product->get_id() !='')
+				{
+					echo json_encode(array('success' => true, 'message' => 'single product inserted'));
+					
+					
+				}
 				
 			}
 		}
-
+       wp_die();
 
 	}
 
@@ -595,6 +616,8 @@ class Wp_List_Example_Admin {
 		curl_close($ch);
 		return $result;
 	}
+
+
 
 
 

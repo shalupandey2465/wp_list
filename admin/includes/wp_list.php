@@ -134,7 +134,7 @@ class Supporthost_List_Table extends WP_List_Table
 				
 				$data[]=array(
 					'image'      => '<img src="' . $urlsss . '" height="50" width="50">',
-					'name'       => $post_info->post_title,
+					'name'       => '<a href="http://localhost/web/practice/wp-admin/post.php?post='."$post_info->ID".'&action=edit">'.$post_info->post_title.'</a>',
 					'price'      => ($main_price != '') ? $main_price : "_",
 					'category'   => ($cat_name != '') ? $cat_name : "_",
 					'tag'        => ($tag_name != '') ? $tag_name : "_",
