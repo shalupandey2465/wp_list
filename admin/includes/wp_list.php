@@ -33,6 +33,7 @@ class Supporthost_List_Table extends WP_List_Table
 	function get_columns()
 	{
 		$columns = array(
+			'cb'            =>  '<input type="checkbox">',
 			'image'         => __('Image', 'supporthost-cookie-consent'),
 			'name'          => __('Name', 'supporthost-cookie-consent'),
 			'price'         => __('Price', 'supporthost-cookie-consent'),
@@ -55,8 +56,7 @@ class Supporthost_List_Table extends WP_List_Table
 			"SELECT * FROM {$table} WHERE meta_key='my_custom_meta_key'",
 			ARRAY_A
 		);
-		// print_r('adf');
-		// die();
+		
 	}
 
 
@@ -69,7 +69,9 @@ class Supporthost_List_Table extends WP_List_Table
 			'category'   => array('category', false),
 			'tag'        => array('tag', false),
 			'price'      => array('price', false),
+			'stock'      =>array('price', false)
 		);
+
 	}
 
 
@@ -85,6 +87,7 @@ class Supporthost_List_Table extends WP_List_Table
 		$data = array();
 		$category=array();
 		$tag=array();
+		$post_type=array();
 		$stock_status=array();
 		$variation = [];
 		$post_meta_info = $this->get_table_data();
@@ -97,6 +100,15 @@ class Supporthost_List_Table extends WP_List_Table
 				$post_info = $post_info[0];
 				$attachment_id = get_post_thumbnail_id($post_info->ID);
 				$url = wp_get_attachment_image_src($attachment_id, 'desired-size');
+				if($url !='')
+				{
+					$urlsss=$url[0];
+				}
+				else
+				{
+
+					$urlsss='https://wabisabiproject.com/wp-content/uploads/woocommerce-placeholder.png';      
+				}
 
 				$cat_term = get_the_terms($post_info->ID, 'product_cat');
 				foreach ($cat_term as $cat_key => $cat_value) {
@@ -107,9 +119,10 @@ class Supporthost_List_Table extends WP_List_Table
 				$product_tag_term = get_the_terms($post_info->ID, 'product_tag');
 				foreach ($product_tag_term as $tag_key => $tag_value) {
 					$tag_name = $tag_value->name;
-				}
 
-				$stock = get_post_meta($post_info->ID, '_stock', true);
+				}
+				$stock = get_post_meta($post_info->ID, '_stock_status', true);
+				$main_price=get_post_meta($data_id, '_price', true);
 				$product = wc_get_product($post_info->ID);
 				$product_parent = $product->get_parent_id();
 				$args = array(
@@ -117,135 +130,258 @@ class Supporthost_List_Table extends WP_List_Table
 					'posts_per_page' => 3  
 				); 
 
-				// print_r($_POST['option_value']);
-				// var_dump(isset($_POST['option_value']));
-				var_dump($_POST['option_value']);
 
-				if( isset( $_REQUEST['option_value']) && $_REQUEST['option_value'] != '' && $_POST['filter-type']=='product') {
-					$argsss = array(
-						'post_status' => 'publish',
-						'tax_query' => array(
-							array(
-								'taxonomy' => 'product_type',
-								'field'    => 'term_id',
-								'terms'     =>  $_POST['option_value'],
-								'operator'  => 'IN'
-							)
-						)
-					);
-					$the_queryss = new wp_query($argsss);
-					print_r($the_queryss);
-				}
-				
-				if($_POST['option_value'] != '' && $_POST['filter-type']=='categories')
-				{
-					$args = array(
-						'post_status' => 'publish',
-						'tax_query' => array(
-							array(
-								'taxonomy' => 'product_cat',
-								'field'    => 'term_id',
-								'terms'     =>  $_POST['option_value'],
-								'operator'  => 'IN'
-							)
-						)
-					);
-					$the_query = new wp_query($args);
-					$term = get_term_by('term_id',$_POST['option_value'], 'product_cat'); 
-					$name = $term->name;
-					$attachment_ids = get_post_thumbnail_id($the_query->posts[0]->ID);
-					$urls = wp_get_attachment_image_src($attachment_ids, 'desired-size');
-
-					$category[]=array(
-						'image'      => '<img src="' . $urls[0] . '" height="50" width="50">',
-						'name'       => $the_query->posts[0]->post_title,
-						'price'      => get_post_meta($the_query->posts[0]->ID, '_price', true),
-						'category'   => $name,
-						'tag'        => '',
-						'stock'      => get_post_meta($the_query->posts[0]->ID, '_stock', true)
-					);
-				}
-				else if($_POST['option_value'] != '' && $_POST['filter-type']=='tags')
-				{
-
-					$args = array(
-						'post_status' => 'publish',
-						'tax_query' => array(
-							array(
-								'taxonomy' => 'product_tag',
-								'field'    => 'term_id',
-								'terms'     =>  $_POST['option_value'],
-								'operator'  => 'IN'
-							)
-						)
-					);
-					$the_query = new wp_query($args);
-					$term = get_term_by('term_id',$_POST['option_value'], 'product_tag'); 
-					$name = $term->name;
-					$attachment_ids = get_post_thumbnail_id($the_query->posts[0]->ID);
-					$urls = wp_get_attachment_image_src($attachment_ids, 'desired-size');
-
-					$tag[]=array(
-						'image'      => '<img src="' . $urls[0] . '" height="50" width="50">',
-						'name'       => $the_query->posts[0]->post_title,
-						'price'      => get_post_meta($the_query->posts[0]->ID, '_price', true),
-						'category'   => '',
-						'tag'        => $name,
-						'stock'      => get_post_meta($the_query->posts[0]->ID, '_stock', true)
-					);
-					
-				}
-				else if(isset($_POST['option_value']) && isset( $_POST['filter-type'] )  )
-				{
-
-					// print_r($_POST['option_value']);
-					$myquery = array(
-						'post_type'  => 'product',
-						'meta_key'   => '_stock_status',
-						'meta_value' => $_POST['option_value'],
-						'order'      => 'ASC'
-					);
-					$the_query = get_posts($myquery);
-					$term_obj_list = get_the_terms( $the_query[0]->ID, 'product_cat' );
-					$attachment_idss = get_post_thumbnail_id($the_query[0]->ID);
-					$urlss = wp_get_attachment_image_src($attachment_idss, 'desired-size');
-					$stock_status[]=array(
-						'image'      => '<img src="' . $urlss[0] . '" height="50" width="50">',
-						'name'       => $the_query[0]->post_title,
-						'price'      => get_post_meta($the_query[0]->ID, '_price', true),
-						'category'   => $term_obj_list[0]->name,
-						'tag'        => '',
-						'stock'      => get_post_meta($the_query[0]->ID, '_stock_status', true)
-					);
-					
-
-				}
-				// elseif( isset( $_REQUEST['option_value']) && 'simple' == $_REQUEST['option_value'] ) {
-				// 	//echo "you were here";
-				// 	echo $_REQUEST['option_value'];
-				// 	echo "<br>";
-				// 	die('hii');
-				// }
-
-				// echo "<br> Optoin value was :- " .$_POST['option_value'] ;
-				
 				
 				$data[]=array(
-					'image'      => '<img src="' . $url[0] . '" height="50" width="50">',
+					'image'      => '<img src="' . $urlsss . '" height="50" width="50">',
 					'name'       => $post_info->post_title,
-					'price'      => get_post_meta($data_id, '_price', true),
-					'category'   => $cat_name,
-					'tag'        => $tag_name,
-					'stock'      => $stock
+					'price'      => ($main_price != '') ? $main_price : "_",
+					'category'   => ($cat_name != '') ? $cat_name : "_",
+					'tag'        => ($tag_name != '') ? $tag_name : "_",
+					'stock'      => ($stock != '') ? $stock : "_"
 				);
 			}
 		}
 
 
-		// if (isset($_POST['product-type']) && $_POST['product-type'] != 'all') {
-		// 	return $variation;
-		// }
-		// return array_merge($variation, $simple);
+		if( isset( $_REQUEST['option_value']) && $_REQUEST['option_value'] != '' && $_POST['filter-type']=='product') {
+			$argsss = array(
+				'post_status' => 'publish',
+				'meta_key'   => 'my_custom_meta_key',
+				'meta_value' => 'my data',
+				'tax_query' => array(
+					array(
+						'taxonomy' => 'product_type',
+						'field'    => 'term_id',
+						'terms'     =>  $_POST['option_value'],
+						'operator'  => 'IN'
+					)
+				)
+			);
+			$the_queryss = new wp_query($argsss);
+			if($the_queryss->posts[0]->ID=='')
+			{
+				return array();
+			}
+			foreach ($the_queryss->posts as $key=>$cate_val){
+
+				$terms = get_the_terms( $cate_val->ID, 'product_cat' );
+				foreach($terms as $term_key=>$term_val)
+				{
+
+					$term_name=$term_val->name;	
+				}
+
+				$tag_terms = get_the_terms( $cate_val->ID, 'product_tag' );
+				foreach($tag_terms as $tag_key=>$tag_val)
+				{
+
+					$tag_term_name=$tag_val->name;	
+
+				}
+				$pro_price=get_post_meta($cate_val->ID, '_price', true);
+				$pro_stock = get_post_meta($cate_val->ID, '_stock_status', true);
+				$attachment_ids = get_post_thumbnail_id($cate_val->ID);
+				$urls = wp_get_attachment_image_src($attachment_ids, 'desired-size');
+				if($urls !='')
+				{
+					$urlsss=$urls[0];
+				}
+				else
+				{
+					$urlsss='https://wabisabiproject.com/wp-content/uploads/woocommerce-placeholder.png'; 
+				}
+				$post_type[]=array(
+					'image'      => '<img src="' . $urlsss . '" height="50" width="50">',
+					'name'       => $cate_val->post_title,
+					'price'      => ($pro_price != '') ? $pro_price : "_",
+					'category'   => ($term_name != '') ? $term_name : "_",
+					'tag'        => ($tag_term_name != '') ? $tag_term_name : "_",
+					'stock'      => ($pro_stock != '') ? $pro_stock : "_"
+				);
+			}
+			
+
+		}
+
+		if($_POST['option_value'] != '' && $_POST['filter-type']=='categories')
+		{
+			$args = array(
+				'post_status' => 'publish',
+				'meta_key'   => 'my_custom_meta_key',
+				'meta_value' => 'my data',
+				'tax_query' => array(
+					array(
+						'taxonomy' => 'product_cat',
+						'field'    => 'term_id',
+						'terms'     =>  $_POST['option_value'],
+						'operator'  => 'IN'
+					)
+				)
+			);
+			$the_query = new wp_query($args);	
+			if($the_query->posts[0]->ID=='')
+			{
+				return array();
+			}
+			foreach ($the_query->posts as $key=>$cate_val){
+
+				$term = get_term_by('term_id',$_POST['option_value'], 'product_cat'); 
+				$name = $term->name;
+				$tag_terms = get_the_terms( $cate_val->ID, 'product_tag' );
+				foreach($tag_terms as $tag_key=>$tag_val)
+				{
+
+					$tag_term_name=$tag_val->name;	
+
+				}
+				$price=get_post_meta($cate_val->ID, '_price', true);
+				$stock=get_post_meta($cate_val->ID, '_stock_status', true);
+				$attachment_ids = get_post_thumbnail_id($cate_val->ID);
+				$urls = wp_get_attachment_image_src($attachment_ids, 'desired-size');
+				if($urls !='')
+				{
+					$urlsss=$urls[0];
+				}
+				else
+				{
+					$urlsss='https://wabisabiproject.com/wp-content/uploads/woocommerce-placeholder.png'; 
+				}
+
+				$category[]=array(
+					'image'      => '<img src="' . $urlsss . '" height="50" width="50">',
+					'name'       => $cate_val->post_title,
+					'price'      => ($price != '') ? $price : "_",
+					'category'   => ($name != '') ? $name : "_",
+					'tag'        => ($tag_term_name != '') ? $tag_term_name : "_",
+					'stock'      => ($stock != '') ? $stock : "_"
+				);
+
+			}
+
+
+			
+		}
+		else if($_POST['option_value'] != '' && $_POST['filter-type']=='tags')
+		{
+
+			$args = array(
+				'post_status' => 'publish',
+				'meta_key'   => 'my_custom_meta_key',
+				'meta_value' => 'my data',
+				'tax_query' => array(
+					array(
+						'taxonomy' => 'product_tag',
+						'field'    => 'term_id',
+						'terms'     =>  $_POST['option_value'],
+						'operator'  => 'IN'
+					)
+				)
+			);
+
+			$the_query = new wp_query($args);
+			if($the_query->posts[0]->ID=='')
+			{
+				return array();
+			}	
+			foreach ($the_query->posts as $key => $value) {
+				
+				$term = get_term_by('term_id',$_POST['option_value'], 'product_tag'); 
+				$name = $term->name;
+				$tag_price=get_post_meta($value->ID, '_price', true);
+				$stock_status=get_post_meta($value->ID, '_stock_status', true);
+				$cat=get_the_terms( $value->ID, 'product_cat' );
+				foreach($cat as $cat_key=>$cat_val)
+				{
+
+					$term_name=$cat_val->name;	
+				}
+				$attachment_ids = get_post_thumbnail_id($value->ID);
+				$urls = wp_get_attachment_image_src($attachment_ids, 'desired-size');
+				if($urls !='')
+				{
+					$urlsss=$urls[0];
+				}
+				else
+				{
+					$urlsss='https://wabisabiproject.com/wp-content/uploads/woocommerce-placeholder.png'; 
+				}
+
+				$tag[]=array(
+					'image'      => '<img src="' . $urlsss. '" height="50" width="50">',
+					'name'       => $value->post_title,
+					'price'      => ($tag_price != '') ? $tag_price : "_",
+					'category'   => ($term_name != '') ? $term_name : "_",
+					'tag'        => ($name != '') ? $name : "_",
+					'stock'      => ($stock_status != '') ? $stock_status : "_"
+				);
+
+			}
+			
+			
+			
+
+		}
+
+		if(isset( $_REQUEST['option_value']) && $_REQUEST['option_value'] != '' && $_POST['filter-type']=='stock')
+		{
+			$myquery = array(
+				'post_type'  => 'product',
+				'meta_key'   => '_stock_status',
+				'meta_value' => $_POST['option_value'],
+				'order'      => 'ASC'
+			);
+			$the_query = get_posts($myquery);
+			if($the_query[0]->ID=='')
+			{
+				return array();
+			}
+			foreach ($the_query as $key=>$cate_val){
+
+				$attachment_idss = get_post_thumbnail_id($cate_val->ID);
+				$urls = wp_get_attachment_image_src($attachment_idss, 'desired-size');
+				if($urls !='')
+				{
+					$urlsss=$urls[0];
+				}
+				else
+				{
+					$urlsss='https://wabisabiproject.com/wp-content/uploads/woocommerce-placeholder.png'; 
+				}
+
+				$stock_status1=get_post_meta($cate_val->ID, '_stock_status', true);
+				$stock_price=get_post_meta($cate_val->ID, '_price', true);
+				$cat=get_the_terms($cate_val->ID, 'product_cat' );
+				foreach($cat as $cat_key=>$cat_val)
+				{
+
+					$term_name=$cat_val->name;	
+				}
+
+
+				$tag=get_the_terms($cate_val->ID, 'product_tag' );
+				foreach($tag as $tag_key=>$tag_val)
+				{
+
+					$tag_name=$tag_val->name;	
+				}
+
+
+				
+				$stock_status[]=array(
+					'image'      => '<img src="' . $urlsss . '" height="50" width="50">',
+					'name'       => $cate_val->post_title,
+					'price'      => ($stock_price != '') ? $stock_price : "_",
+					'category'   => ($term_name != '') ? $term_name : "_",
+					'tag'        => ($tag_name != '') ? $tag_name : "_",
+					'stock'      => ($stock_status1 != '') ? $stock_status1 : "_"
+				);
+			}
+			
+
+
+		}
+		
 		if($_POST['option_value'] != '' && $_POST['filter-type']=='categories')
 		{
 			return  $category;
@@ -254,9 +390,15 @@ class Supporthost_List_Table extends WP_List_Table
 		{
 			return $tag;
 		}
-		else if(isset($_POST['option_value']) && isset( $_POST['filter-type'] )  )
+
+		if(isset( $_REQUEST['option_value']) && $_REQUEST['option_value'] != '' && $_POST['filter-type']=='stock')
 		{
 			return $stock_status;
+		}
+
+		if( isset( $_REQUEST['option_value']) && $_REQUEST['option_value'] != '' && $_POST['filter-type']=='product')
+		{
+			return $post_type;
 		}
 
 		return $data;
@@ -267,6 +409,7 @@ class Supporthost_List_Table extends WP_List_Table
 	public function column_default($item, $column_name)
 	{
 		switch ($column_name) {
+			case 'cb':
 			case 'image':
 			case 'name':
 			case 'price':
@@ -350,7 +493,7 @@ class Supporthost_List_Table extends WP_List_Table
 			$all_categories = get_categories( $args );
 
 		}
-		else if($filter_type=='stock status')
+		else if($filter_type=='stock')
 		{
 			
 			global $wpdb;
@@ -379,7 +522,7 @@ class Supporthost_List_Table extends WP_List_Table
 						<option <?= selected( $_REQUEST['filter-type'], 'categories', false ) ?> value="categories">Categories</option>
 						<option <?= selected( $_REQUEST['filter-type'], 'tags', false ) ?> value="tags">Tags</option>
 						<option <?= selected( $_REQUEST['filter-type'], 'product', false ) ?> value="product">Product Type</option>
-						<option <?= selected( $_REQUEST['filter-type'], 'stock_status', false ) ?> value="stock status">Stock Status</option>
+						<option <?= selected( $_REQUEST['filter-type'], 'stock', false ) ?> value="stock">Stock Status</option>
 					</select>
 					<select class="perform_onchange" name="option_value">
 
