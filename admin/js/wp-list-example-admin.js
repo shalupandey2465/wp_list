@@ -68,7 +68,7 @@ jQuery(document).ready(function(){
     var error_ms='';
     if(consumer_key=='' || consumer_secret=='')
     {
-       error_ms='<div class="notice notice-success is-dismissible my_notice"><p><strong>SUCCESS: </strong>Fields are Empty</p><button type="button" class="notice-dismiss" ><span class="screen-reader-text">Dismiss this notice.</span></button></div>';
+       error_ms='<div class="notice notice-warning is-dismissible my_notice"><p><strong>SUCCESS: </strong>Fields are Empty</p><button type="button" class="notice-dismiss" ><span class="screen-reader-text">Dismiss this notice.</span></button></div>';
        jQuery('.show_notice').html(error_ms);
    }
    else
@@ -85,46 +85,57 @@ jQuery(document).ready(function(){
            consumer_secret : consumer_secret
 
        },
-        beforeSend:function()
+       beforeSend:function()
        {
          jQuery('.progress').show();
          var percentVal= "0%";
          jQuery('.bar').css("width",percentVal);
-       },
-       uploadProgress:function(event,position,total,percentComplete)
-       {
+     },
+     uploadProgress:function(event,position,total,percentComplete)
+     {
          var percentVal = percentComplete +"%";
          // console.log(percentVal);
          jQuery('.bar').css("width",percentVal);
-       },
-       complete:function(xhr)
+     },
+     success:function(result)
+     {
+       jQuery('#overlayone').html(' ');
+       jQuery('.progress').hide();
+       var msg='';
+       if(result.data == "product already exists")
        {
-        jQuery('.progress').hide();
-          var msg='';
-           if(xhr)
-           {
-               msg= '<div class="notice notice-success is-dismissible my_notice"><p><strong>SUCCESS: </strong>Product Imported successfully</p><button type="button" class="notice-dismiss"><span class="screen-reader-text">Dismiss this notice.</span></button></div>';
-               jQuery('#overlayone').html(' ');
-           }
-           jQuery('.show_notice').html(msg);
+           // jQuery('#overlayone').html(' ');
+           msg = '<div class="notice notice-warning is-dismissible my_notice"><p><strong>SUCCESS: </strong>Product Already Exists</p><button type="button" class="notice-dismiss"><span class="screen-reader-text">Dismiss this notice.</span></button></div>';
+           
+       }
+       else if(result.data == "single product inserted'")
+       {
+            // jQuery('#overlayone').html(' ');
+            msg = '<div class="notice notice-success is-dismissible my_notice"><p><strong>SUCCESS: </strong>Product Imported successfully</p><button type="button" class="notice-dismiss"><span class="screen-reader-text">Dismiss this notice.</span></button></div>';
+          
        }
 
-    });
+           jQuery('.show_notice').html(msg);
+       
+   } 
+
+
+});
    }
 }
 else
 {
-   
+
     percentComplete=percentComplete+20;
 
     var consumer_key=jQuery('#consumer_key').val();
     var consumer_secret=jQuery('#consumer_secret').val();
     var product_id=jQuery('#product_id').val();
     var error_ms='';
-    if(consumer_key=='' || consumer_secret=='')
+    if(consumer_key=='' || consumer_secret=='' || product_id=='')
     {
        jQuery('.show_notice').html('');
-       error_ms='<div class="notice notice-success is-dismissible my_notice"><p><strong>SUCCESS: </strong>Fields are Empty</p><button type="button" class="notice-dismiss" onclick="dissmiss_notice(this);"><span class="screen-reader-text">Dismiss this notice.</span></button></div>';
+       error_ms='<div class="notice notice-warning is-dismissible my_notice"><p><strong>SUCCESS: </strong>Fields are Empty</p><button type="button" class="notice-dismiss" onclick="dissmiss_notice(this);"><span class="screen-reader-text">Dismiss this notice.</span></button></div>';
        jQuery('.show_notice').html(error_ms);
    }
    else
@@ -147,38 +158,39 @@ else
          jQuery('.progress').show();
          var percentVal= "0%";
          jQuery('.bar').css("width",percentVal);
-       },
-       uploadProgress:function(event,position,total,percentComplete)
-       {
+     },
+     uploadProgress:function(event,position,total,percentComplete)
+     {
          var percentVal = percentComplete +"%";
-         console.log(percentVal);
+         // console.log(percentVal);
          jQuery('.bar').css("width",percentVal);
-       },
-       complete:function(xhr)
+     },
+     success:function(result)
+     {
+       jQuery('.progress').hide();
+       var msg='';
+       if(result.data == "product already exists")
        {
-        jQuery('.progress').hide();
-          var msg='';
-           if(xhr)
-           {
-               msg= '<div class="notice notice-success is-dismissible my_notice"><p><strong>SUCCESS: </strong>Product Imported successfully</p><button type="button" class="notice-dismiss"><span class="screen-reader-text">Dismiss this notice.</span></button></div>';
-               jQuery('#overlayone').html(' ');
-           }
-           jQuery('.show_notice').html(msg);
+           jQuery('#overlayone').html(' ');
+           msg = '<div class="notice notice-warning is-dismissible my_notice"><p><strong>SUCCESS: </strong>Product Already Exists</p><button type="button" class="notice-dismiss"><span class="screen-reader-text">Dismiss this notice.</span></button></div>';
+           
        }
-       // success:function(result){
-         
-       // }
+       else if(result.data == "single product inserted'")
+       {
+            msg = '<div class="notice notice-success is-dismissible my_notice"><p><strong>SUCCESS: </strong>Product Imported successfully</p><button type="button" class="notice-dismiss"><span class="screen-reader-text">Dismiss this notice.</span></button></div>';
+           jQuery('#overlayone').html(' ');
+       }
 
-   });
+           jQuery('.show_notice').html(msg);
+       
+   } 
+
+  });
   }
 }
-
-
-
-
 });
 
-  jQuery('.product-type').on('change', function(){
+jQuery('.product-type').on('change', function(){
     var product_type = jQuery(this).val();
     if( product_type != '' ){
         jQuery(this).parents('form').submit();
@@ -186,7 +198,7 @@ else
     }
 });
 
-  jQuery('.filter-type').on('change',function(){
+jQuery('.filter-type').on('change',function(){
 
 
 
@@ -200,7 +212,7 @@ else
 
 });
 
-  jQuery('#filter_data').on('click', function(){
+jQuery('#filter_data').on('click', function(){
     var filter_type_name = jQuery('.perform_onchange').val();
 
     if( filter_type_name != '' ){
@@ -211,10 +223,6 @@ else
 
 
 
-// function dissmiss_notice(element)
-// {
-//    alert('hi');
-// }
 
 });
 

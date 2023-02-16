@@ -16,7 +16,7 @@ class Supporthost_List_Table extends WP_List_Table
 		$columns = $this->get_columns();
 		$hidden = array();
 		$sortable = $this->get_sortable_columns();
-		$perPage = 10;
+		$perPage = $this->count_product_qnty();
 		$currentPage = $this->get_pagenum();
 		$totalItems = count($data);
 		$this->set_pagination_args(array(
@@ -69,7 +69,7 @@ class Supporthost_List_Table extends WP_List_Table
 			'category'   => array('category', false),
 			'tag'        => array('tag', false),
 			'price'      => array('price', false),
-			'stock'      =>array('price', false)
+			'stock'      =>array('stock', false)
 		);
 
 	}
@@ -456,6 +456,15 @@ class Supporthost_List_Table extends WP_List_Table
 
 		return $result;
 	}
+
+	public function count_product_qnty()
+	{
+		$qty=$_POST['product_qnty'];
+		return $qty;
+
+
+	}
+
 	public function extra_tablenav($which)
 	{
 		
@@ -517,6 +526,13 @@ class Supporthost_List_Table extends WP_List_Table
 			
 			<div class="alignleft actions bulkactions">
 				<form action="<?php echo $_SERVER['REQUEST_URI'] ?>" method="post">
+					<select name="product_qnty">
+						<option <?= selected( $_REQUEST['product_qnty'], '5', false ) ?> value="5">5</option>
+						<option <?= selected( $_REQUEST['product_qnty'], '10', false ) ?> value="10">10</option>
+						<option <?= selected( $_REQUEST['product_qnty'], '15', false ) ?> value="15">15</option>
+						<option <?= selected( $_REQUEST['product_qnty'], '20', false ) ?> value="20">20</option>
+						<option <?= selected( $_REQUEST['product_qnty'], '25', false ) ?> value="25">25</option>
+					</select>
 					<select name="filter-type" class="filter-type">
 						<option <?= selected( $_REQUEST['filter-type'], 'all', false ) ?> value="all">All</option>
 						<option <?= selected( $_REQUEST['filter-type'], 'categories', false ) ?> value="categories">Categories</option>

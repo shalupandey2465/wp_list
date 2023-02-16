@@ -157,19 +157,27 @@ class Wp_List_Example_Admin {
 
 	public function get_product_by_id()
 	{
+
+		global $wpdb;
+		$table = $wpdb->prefix . 'postmeta';
 		$progress_count=array();
 		$consumer_key     = $_POST['consumer_key'];
 		$consumer_secret  = $_POST['consumer_secret'];
 		$product_id       = $_POST['product_id'];
-		$progress_count=array(
-
-                          'consumer_key' =>$_POST['consumer_key'],
-                          'consumer_secret'=>$_POST['consumer_secret'],
-                          'product_id'=>$_POST['product_id']
+		$all_categoriess =  $wpdb->get_results(
+			"SELECT meta_value FROM {$table} WHERE meta_key='product_customid' LIMIT 1"
 		);
-		$item_counts=count($progress_count);
+       if($all_categoriess[0]->meta_value == $product_id )
+       {
+       	
+       	  wp_send_json_error('product already exists');
+       }
+       else
+       {
+
 		$data              = $this->get_product_list($consumer_key,$consumer_secret,$product_id);
 		$file_content      = json_decode($data,true);
+
 		$images            = $file_content['images'];
 		$imgs=array();
 		
@@ -193,7 +201,7 @@ class Wp_List_Example_Admin {
 			$product->set_sale_price($file_content['sale_price']);
 		               // $product->set_sku($file_content['sku']); 
 			$product->update_meta_data( 'my_custom_meta_key', 'my data' );
-			$product->update_meta_data( 'product_id', 'my data' );
+			$product->update_meta_data( 'product_customid', $file_content['id']);
 			$product->set_image_id($imgs['attachement']);
 			$product->set_stock_status( 'instock' );
 			$product->set_manage_stock( true );
@@ -234,7 +242,7 @@ class Wp_List_Example_Admin {
 			$product->save();
 			if($product->get_id() !='')
 			{
-				echo json_encode(array('success' => true, 'message' => 'single product inserted','progress_count_data'=>$item_counts));
+				wp_send_json_success('single product inserted');
 				
 				
 			}
@@ -251,7 +259,7 @@ class Wp_List_Example_Admin {
 			$product->set_short_description($file_content['description'].''.$file_content['short_description']);
 	               // $product->set_sku($file_content['sku']); 
 			$product->update_meta_data( 'my_custom_meta_key', 'my data' );
-
+            $product->update_meta_data( 'product_customid', $file_content['id']);
 			$product->set_image_id($imgs['attachement']);
 			$product->set_stock_status( 'instock' );
 			$product->set_manage_stock( true );
@@ -317,7 +325,7 @@ class Wp_List_Example_Admin {
 
 			if($product->get_id() !='')
 			{
-				echo json_encode(array('success' => true, 'message' => 'single product inserted'));
+				wp_send_json_success('single product inserted');
 				
 				
 			}
@@ -325,6 +333,7 @@ class Wp_List_Example_Admin {
 
 
 		}
+	  }
 		
 	}
 
@@ -630,9 +639,9 @@ class Wp_List_Example_Admin {
 
 
 
-	// public function wpb_admin_notice_warn()
+	// public function wpb_admin_notice_warn_this()
 	// {
-	// 	echo '<div class="notice notice-warning is-dismissible">Please Enter the Required Fields</div>'; 
+	// 	echo '<div class="notice notice-warning is-dismissible">product Already Exist !!</div>'; 
 	// }
 
 
