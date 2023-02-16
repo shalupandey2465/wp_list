@@ -121,6 +121,9 @@ class Wp_List_Example_Admin {
 		echo '
 		<div id="overlayone"></div>
 		<div class="show_notice"></div>
+		<div class="progress" style="display:none;">
+		  <div class="progress-bar progress-bar-striped progress-bar-animated bar" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width: 0%"></div>
+		</div>
 		<div class="card">
 		<div class="card-body">
 		<form action="" method="post">
@@ -154,28 +157,30 @@ class Wp_List_Example_Admin {
 
 	public function get_product_by_id()
 	{
-		
+		$progress_count=array();
 		$consumer_key     = $_POST['consumer_key'];
 		$consumer_secret  = $_POST['consumer_secret'];
 		$product_id       = $_POST['product_id'];
-        if($consumer_key == '' || $consumer_secret='' || $product_id ='')
-        {
-             $this->wpb_admin_notice_warn();
-             exit();
-        }
+		$progress_count=array(
+
+                          'consumer_key' =>$_POST['consumer_key'],
+                          'consumer_secret'=>$_POST['consumer_secret'],
+                          'product_id'=>$_POST['product_id']
+		);
+		$item_counts=count($progress_count);
 		$data              = $this->get_product_list($consumer_key,$consumer_secret,$product_id);
 		$file_content      = json_decode($data,true);
 		$images            = $file_content['images'];
 		$imgs=array();
 		
-		// foreach($images as $img=>$im)
-		// {
+		foreach($images as $img=>$im)
+		{
 
 
-		// 	$imgs['attachement']=$this->get_image($im['src']);		
+			$imgs['attachement']=$this->get_image($im['src']);		
 
 
-		// }    
+		}    
 
 		if($file_content['variations'] == [])
 		{
@@ -188,6 +193,7 @@ class Wp_List_Example_Admin {
 			$product->set_sale_price($file_content['sale_price']);
 		               // $product->set_sku($file_content['sku']); 
 			$product->update_meta_data( 'my_custom_meta_key', 'my data' );
+			$product->update_meta_data( 'product_id', 'my data' );
 			$product->set_image_id($imgs['attachement']);
 			$product->set_stock_status( 'instock' );
 			$product->set_manage_stock( true );
@@ -228,7 +234,7 @@ class Wp_List_Example_Admin {
 			$product->save();
 			if($product->get_id() !='')
 			{
-				echo json_encode(array('success' => true, 'message' => 'single product inserted'));
+				echo json_encode(array('success' => true, 'message' => 'single product inserted','progress_count_data'=>$item_counts));
 				
 				
 			}

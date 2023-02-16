@@ -55,12 +55,13 @@ jQuery(document).ready(function(){
 jQuery(document).ready(function(){
 
   jQuery('#wp_List_Example').on('click',function(e){
-
+   var percentComplete=0;
    e.preventDefault();
 
    var checkbox=jQuery('#exampleCheck1:checked').val();
    if(checkbox=='on')
    {
+    percentComplete=percentComplete+20;
     jQuery('.show_notice').html('');
     var consumer_key=jQuery('#consumer_key').val();
     var consumer_secret=jQuery('#consumer_secret').val();
@@ -84,22 +85,37 @@ jQuery(document).ready(function(){
            consumer_secret : consumer_secret
 
        },
-       success:function(result){
-        var msg='';
-        if(result)
-        {
-
-           msg= '<div class="notice notice-success is-dismissible my_notice"><p><strong>SUCCESS: </strong>Product Imported successfully</p><button type="button" class="notice-dismiss" ><span class="screen-reader-text">Dismiss this notice.</span></button></div>';
-           jQuery('#overlayone').html(' ');
+        beforeSend:function()
+       {
+         jQuery('.progress').show();
+         var percentVal= "0%";
+         jQuery('.bar').css("width",percentVal);
+       },
+       uploadProgress:function(event,position,total,percentComplete)
+       {
+         var percentVal = percentComplete +"%";
+         // console.log(percentVal);
+         jQuery('.bar').css("width",percentVal);
+       },
+       complete:function(xhr)
+       {
+        jQuery('.progress').hide();
+          var msg='';
+           if(xhr)
+           {
+               msg= '<div class="notice notice-success is-dismissible my_notice"><p><strong>SUCCESS: </strong>Product Imported successfully</p><button type="button" class="notice-dismiss"><span class="screen-reader-text">Dismiss this notice.</span></button></div>';
+               jQuery('#overlayone').html(' ');
+           }
+           jQuery('.show_notice').html(msg);
        }
-       jQuery('.show_notice').html(msg);
-   }
 
-});
+    });
    }
 }
 else
 {
+   
+    percentComplete=percentComplete+20;
 
     var consumer_key=jQuery('#consumer_key').val();
     var consumer_secret=jQuery('#consumer_secret').val();
@@ -126,15 +142,32 @@ else
            product_id      : product_id
 
        },
-       success:function(result){
-           var msg='';
-           if(result)
+       beforeSend:function()
+       {
+         jQuery('.progress').show();
+         var percentVal= "0%";
+         jQuery('.bar').css("width",percentVal);
+       },
+       uploadProgress:function(event,position,total,percentComplete)
+       {
+         var percentVal = percentComplete +"%";
+         console.log(percentVal);
+         jQuery('.bar').css("width",percentVal);
+       },
+       complete:function(xhr)
+       {
+        jQuery('.progress').hide();
+          var msg='';
+           if(xhr)
            {
                msg= '<div class="notice notice-success is-dismissible my_notice"><p><strong>SUCCESS: </strong>Product Imported successfully</p><button type="button" class="notice-dismiss"><span class="screen-reader-text">Dismiss this notice.</span></button></div>';
                jQuery('#overlayone').html(' ');
            }
            jQuery('.show_notice').html(msg);
        }
+       // success:function(result){
+         
+       // }
 
    });
   }
