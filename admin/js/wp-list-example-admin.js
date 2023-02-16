@@ -53,17 +53,28 @@ jQuery(document).ready(function(){
 });
 
 jQuery(document).ready(function(){
+
   jQuery('#wp_List_Example').on('click',function(e){
 
    e.preventDefault();
+
    var checkbox=jQuery('#exampleCheck1:checked').val();
-   console.log(checkbox);
    if(checkbox=='on')
    {
-
+    jQuery('.show_notice').html('');
     var consumer_key=jQuery('#consumer_key').val();
     var consumer_secret=jQuery('#consumer_secret').val();
-    jQuery.ajax({
+    var error_ms='';
+    if(consumer_key=='' || consumer_secret=='')
+    {
+       error_ms='<div class="notice notice-success is-dismissible my_notice"><p><strong>SUCCESS: </strong>Fields are Empty</p><button type="button" class="notice-dismiss" ><span class="screen-reader-text">Dismiss this notice.</span></button></div>';
+       jQuery('.show_notice').html(error_ms);
+   }
+   else
+   {
+       jQuery('.show_notice').html('');
+       jQuery('#overlayone').html('<div id="overlay"><img id="overlay_img" src="http://localhost/web/practice/wp-content/uploads/2023/02/loading.gif" /></div>');
+       jQuery.ajax({
 
         url  : 'admin-ajax.php',
         type :  'post',
@@ -77,22 +88,34 @@ jQuery(document).ready(function(){
         var msg='';
         if(result)
         {
-           msg= '<div class="notice notice-success is-dismissible my_notice"><p><strong>SUCCESS: </strong>Product Imported successfully</p><button type="button" class="notice-dismiss" onclick="javascript: return px_dissmiss_notice(this);"><span class="screen-reader-text">Dismiss this notice.</span></button></div>';
+
+           msg= '<div class="notice notice-success is-dismissible my_notice"><p><strong>SUCCESS: </strong>Product Imported successfully</p><button type="button" class="notice-dismiss" ><span class="screen-reader-text">Dismiss this notice.</span></button></div>';
+           jQuery('#overlayone').html(' ');
        }
        jQuery('.show_notice').html(msg);
    }
 
 });
+   }
 }
 else
 {
 
-
-
     var consumer_key=jQuery('#consumer_key').val();
     var consumer_secret=jQuery('#consumer_secret').val();
     var product_id=jQuery('#product_id').val();
-    jQuery.ajax({
+    var error_ms='';
+    if(consumer_key=='' || consumer_secret=='')
+    {
+       jQuery('.show_notice').html('');
+       error_ms='<div class="notice notice-success is-dismissible my_notice"><p><strong>SUCCESS: </strong>Fields are Empty</p><button type="button" class="notice-dismiss" onclick="dissmiss_notice(this);"><span class="screen-reader-text">Dismiss this notice.</span></button></div>';
+       jQuery('.show_notice').html(error_ms);
+   }
+   else
+   {
+      jQuery('.show_notice').html('');
+      jQuery('#overlayone').append('<div id="overlay"><img id="overlay_img" src="http://localhost/web/practice/wp-content/uploads/2023/02/loading.gif" /></div>');
+      jQuery.ajax({
 
         url  : 'admin-ajax.php',
         type :  'post',
@@ -107,12 +130,14 @@ else
            var msg='';
            if(result)
            {
-               msg= '<div class="notice notice-success is-dismissible my_notice"><p><strong>SUCCESS: </strong>Product Imported successfully</p><button type="button" class="notice-dismiss" onclick="javascript: return px_dissmiss_notice(this);"><span class="screen-reader-text">Dismiss this notice.</span></button></div>';
+               msg= '<div class="notice notice-success is-dismissible my_notice"><p><strong>SUCCESS: </strong>Product Imported successfully</p><button type="button" class="notice-dismiss"><span class="screen-reader-text">Dismiss this notice.</span></button></div>';
+               jQuery('#overlayone').html(' ');
            }
            jQuery('.show_notice').html(msg);
        }
 
    });
+  }
 }
 
 
@@ -150,6 +175,13 @@ else
         jQuery('#filter_data').parents('form').submit();   
     }
 });
+
+
+
+// function dissmiss_notice(element)
+// {
+//    alert('hi');
+// }
 
 });
 

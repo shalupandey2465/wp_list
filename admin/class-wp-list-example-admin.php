@@ -119,6 +119,7 @@ class Wp_List_Example_Admin {
 	public function my_custom_menu_page()
 	{
 		echo '
+		<div id="overlayone"></div>
 		<div class="show_notice"></div>
 		<div class="card">
 		<div class="card-body">
@@ -157,20 +158,24 @@ class Wp_List_Example_Admin {
 		$consumer_key     = $_POST['consumer_key'];
 		$consumer_secret  = $_POST['consumer_secret'];
 		$product_id       = $_POST['product_id'];
-
+        if($consumer_key == '' || $consumer_secret='' || $product_id ='')
+        {
+             $this->wpb_admin_notice_warn();
+             exit();
+        }
 		$data              = $this->get_product_list($consumer_key,$consumer_secret,$product_id);
 		$file_content      = json_decode($data,true);
 		$images            = $file_content['images'];
 		$imgs=array();
 		
-		foreach($images as $img=>$im)
-		{
+		// foreach($images as $img=>$im)
+		// {
 
 
-			$imgs['attachement']=$this->get_image($im['src']);		
+		// 	$imgs['attachement']=$this->get_image($im['src']);		
 
 
-		}    
+		// }    
 
 		if($file_content['variations'] == [])
 		{
@@ -449,9 +454,8 @@ class Wp_List_Example_Admin {
 
 						$nameb = wp_insert_term($cats_value['name'], 'product_cat');
 						$cats[]= $nameb['term_id'];
-
-
 					}
+
 					$sample_product->set_tag_ids($cats);
 
 				}
@@ -616,6 +620,14 @@ class Wp_List_Example_Admin {
 		curl_close($ch);
 		return $result;
 	}
+
+
+
+
+	// public function wpb_admin_notice_warn()
+	// {
+	// 	echo '<div class="notice notice-warning is-dismissible">Please Enter the Required Fields</div>'; 
+	// }
 
 
 
