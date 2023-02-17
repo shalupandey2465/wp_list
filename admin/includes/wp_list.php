@@ -6,6 +6,8 @@ if (!class_exists('WP_List_Table')) {
 }
 
 
+
+
 class Supporthost_List_Table extends WP_List_Table
 {
 
@@ -47,15 +49,36 @@ class Supporthost_List_Table extends WP_List_Table
 
 
 
-	private function get_table_data()
+	private function get_table_data($search = '')
 	{
 
 		global $wpdb;
 		$table = $wpdb->prefix . 'postmeta';
-		return $wpdb->get_results(
-			"SELECT * FROM {$table} WHERE meta_key='my_custom_meta_key'",
-			ARRAY_A
-		);
+		$postdta= $wpdb->prefix . 'posts';
+		$product_searched_data=array();
+		 if( !empty($search) ) {
+
+            // $post_id = $wpdb->get_results(
+			// 			"SELECT post_id FROM {$table} WHERE meta_key='my_custom_meta_key'",
+						
+			// 		);
+            // foreach($post_id as $idsss=>$post_idsss)
+            // {
+	            	$post_info = $wpdb->get_results(
+					 "SELECT * FROM `wp_posts` WHERE `post_title` LIKE CONCAT('".$search."','%')"
+				);
+            return $post_info;
+
+          
+        } else {
+
+					$product_searched_data['search_data']=$wpdb->get_results(
+						"SELECT * FROM {$table} WHERE meta_key='my_custom_meta_key'",
+						ARRAY_A
+					);
+
+					return  $product_searched_data['search_data'];
+	      }
 		
 	}
 
@@ -90,8 +113,55 @@ class Supporthost_List_Table extends WP_List_Table
 		$post_type=array();
 		$stock_status=array();
 		$variation = [];
-		$post_meta_info = $this->get_table_data();
-		foreach ($post_meta_info as $key => $value) {
+		if ( isset($_POST['s']) ) 
+		{
+            $post_meta_info  = $this->get_table_data($_POST['s']);
+             foreach($post_meta_info as $post_key_info=>$post_info_value)
+             {
+             	
+                $attachment_id = get_post_thumbnail_id($post_info_value->ID);
+                // print_r($post_info_value->post_title);
+				$url = wp_get_attachment_image_src($attachment_id, 'desired-size');
+				if($url !='')
+				{
+					$urlsss=$url[0];
+				}
+				else
+				{
+
+					$urlsss='https://wabisabiproject.com/wp-content/uploads/woocommerce-placeholder.png';      
+				}
+
+				$cat_term = get_the_terms($post_info_value->ID, 'product_cat');
+				foreach ($cat_term as $cat_key => $cat_value) {
+
+					$cat_name = $cat_value->name;
+				}
+
+				$product_tag_term = get_the_terms($post_info_value->ID, 'product_tag');
+				foreach ($product_tag_term as $tag_key => $tag_value) {
+					$tag_name = $tag_value->name;
+
+				}
+				$stock = get_post_meta($post_info_value->ID, '_stock_status', true);
+				$main_price=get_post_meta($post_info_value->ID, '_price', true);
+				$data[]=array(
+					'image'      => '<a href="http://localhost/web/practice/?product='."$post_info_value->post_name".'"><img src="' . $urlsss . '" height="50" width="50"></a>',
+					'name'       => '<a href="http://localhost/web/practice/wp-admin/post.php?post='."$post_info_value->ID".'&action=edit">'.$post_info_value->post_title.'</a>',
+					'price'      => ($main_price != '') ? $main_price : "_",
+					'category'   => ($cat_name != '') ? $cat_name : "_",
+					'tag'        => ($tag_name != '') ? $tag_name : "_",
+					'stock'      => ($stock != '') ? $stock : "_"
+				);
+             }
+           
+
+         } 
+         else
+          {
+            $post_meta_info  = $this->get_table_data();
+        
+		     foreach ($post_meta_info as $key => $value) {
 			$data_id = $value['post_id'];
 			$post_info = $wpdb->get_results(
 				"SELECT * FROM {$table} WHERE ID='" . $data_id . "'"
@@ -133,7 +203,7 @@ class Supporthost_List_Table extends WP_List_Table
 
 				
 				$data[]=array(
-					'image'      => '<img src="' . $urlsss . '" height="50" width="50">',
+					'image'      => '<a href="http://localhost/web/practice/?product='."$post_info->post_title".'"><img src="' . $urlsss . '" height="50" width="50"></a>',
 					'name'       => '<a href="http://localhost/web/practice/wp-admin/post.php?post='."$post_info->ID".'&action=edit">'.$post_info->post_title.'</a>',
 					'price'      => ($main_price != '') ? $main_price : "_",
 					'category'   => ($cat_name != '') ? $cat_name : "_",
@@ -142,6 +212,7 @@ class Supporthost_List_Table extends WP_List_Table
 				);
 			}
 		}
+	 }
 
 
 		if( isset( $_REQUEST['option_value']) && $_REQUEST['option_value'] != '' && $_POST['filter-type']=='product') {
@@ -459,11 +530,25 @@ class Supporthost_List_Table extends WP_List_Table
 
 	public function count_product_qnty()
 	{
+		
 		$qty=$_POST['product_qnty'];
-		return $qty;
+		update_option('product_quantity_option',$qty);
+		$product_qunt=get_option('product_quantity_option');
+		if($product_qunt !='')
+		{
+			$quntyyy=$product_qunt;
+
+		}
+		else
+		{
+			$quntyyy=10;
+		}
+
+		return $quntyyy;
 
 
 	}
+
 
 	public function extra_tablenav($which)
 	{
@@ -588,8 +673,16 @@ class Supporthost_List_Table extends WP_List_Table
 
 
 	$myListTable = new Supporthost_List_Table();
-	echo '<div class="wrap"><h2>My List Table Test</h2>';
-	$myListTable->prepare_items();
-	$myListTable->display();
-	echo '</div>';
-?>
+	
+	
+	?>
+	<div class="wrap"><h2>My List Table Test</h2>
+      <form action="<?php echo $_SERVER['REQUEST_URI'] ?>" method="post">
+	    <?php	     
+	    $myListTable->prepare_items();	    
+	     $myListTable->search_box( __( 'Search' ), 'search-box-id' ); 
+	    $myListTable->display();
+	    ?>
+	 <input type="hidden" name="page" value=""/>
+	</form>
+	</div>

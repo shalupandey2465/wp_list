@@ -59,135 +59,117 @@ jQuery(document).ready(function(){
    e.preventDefault();
 
    var checkbox=jQuery('#exampleCheck1:checked').val();
-   if(checkbox=='on')
-   {
-    percentComplete=percentComplete+20;
-    jQuery('.show_notice').html('');
-    var consumer_key=jQuery('#consumer_key').val();
-    var consumer_secret=jQuery('#consumer_secret').val();
-    var error_ms='';
-    if(consumer_key=='' || consumer_secret=='')
-    {
-       error_ms='<div class="notice notice-warning is-dismissible my_notice"><p><strong>SUCCESS: </strong>Fields are Empty</p><button type="button" class="notice-dismiss" ><span class="screen-reader-text">Dismiss this notice.</span></button></div>';
-       jQuery('.show_notice').html(error_ms);
-   }
-   else
-   {
-       jQuery('.show_notice').html('');
-       jQuery('#overlayone').html('<div id="overlay"><img id="overlay_img" src="http://localhost/web/practice/wp-content/uploads/2023/02/loading.gif" /></div>');
-       jQuery.ajax({
-
-        url  : 'admin-ajax.php',
-        type :  'post',
-        data :{
-           'action'        : 'get_all_product',
-           consumer_key    : consumer_key,
-           consumer_secret : consumer_secret
-
-       },
-       beforeSend:function()
+       if(checkbox=='on')
        {
-         jQuery('.progress').show();
-         var percentVal= "0%";
-         jQuery('.bar').css("width",percentVal);
-     },
-     uploadProgress:function(event,position,total,percentComplete)
-     {
-         var percentVal = percentComplete +"%";
-         // console.log(percentVal);
-         jQuery('.bar').css("width",percentVal);
-     },
-     success:function(result)
-     {
-       jQuery('#overlayone').html(' ');
-       jQuery('.progress').hide();
-       var msg='';
-       if(result.data == "product already exists")
-       {
-           // jQuery('#overlayone').html(' ');
-           msg = '<div class="notice notice-warning is-dismissible my_notice"><p><strong>SUCCESS: </strong>Product Already Exists</p><button type="button" class="notice-dismiss"><span class="screen-reader-text">Dismiss this notice.</span></button></div>';
-           
-       }
-       else if(result.data == "single product inserted'")
-       {
-            // jQuery('#overlayone').html(' ');
-            msg = '<div class="notice notice-success is-dismissible my_notice"><p><strong>SUCCESS: </strong>Product Imported successfully</p><button type="button" class="notice-dismiss"><span class="screen-reader-text">Dismiss this notice.</span></button></div>';
-          
-       }
+            jQuery('.show_notice').html('');
+            var consumer_key=jQuery('#consumer_key').val();
+            var consumer_secret=jQuery('#consumer_secret').val();
+            var post_status=jQuery('#product_statuss').val();
+            var error_ms='';
+            if(consumer_key=='' || consumer_secret=='')
+            {
+               error_ms='<div class="notice notice-warning is-dismissible my_notice"><p><strong>SUCCESS: </strong>Fields are Empty</p><button type="button" class="notice-dismiss" ><span class="screen-reader-text">Dismiss this notice.</span></button></div>';
+               jQuery('.show_notice').html(error_ms);
+           }
+           else
+           {
+               jQuery('.show_notice').html('');
+               jQuery('#overlayone').html('<div id="overlay"><img id="overlay_img" src="http://localhost/web/practice/wp-content/uploads/2023/02/loading.gif" /></div>');
+               jQuery.ajax({
 
-           jQuery('.show_notice').html(msg);
-       
-   } 
+                url  : 'admin-ajax.php',
+                type :  'post',
+                data :{
+                   'action'        : 'get_all_product',
+                   consumer_key    : consumer_key,
+                   consumer_secret : consumer_secret,
+                   post_status     : post_status
+
+               },
+             success:function(result)
+             {
+               jQuery('#overlayone').html(' ');
+               jQuery('.progress').hide();
+               var msg='';
+               if(result.data == "product already exists")
+               {
+                   
+                   msg = '<div class="notice notice-warning is-dismissible my_notice"><p><strong>SUCCESS: </strong>Product Already Exists</p><button type="button" class="notice-dismiss"><span class="screen-reader-text">Dismiss this notice.</span></button></div>';
+                   
+               }
+               else if(result.data == "single product inserted'")
+               {
+                  
+                    msg = '<div class="notice notice-success is-dismissible my_notice"><p><strong>SUCCESS: </strong>Product Imported successfully</p><button type="button" class="notice-dismiss"><span class="screen-reader-text">Dismiss this notice.</span></button></div>';
+                  
+               }
+
+                   jQuery('.show_notice').html(msg);
+               
+           } 
 
 
-});
-   }
-}
-else
-{
+        });
+        }
+        }
+        else
+        {
 
-    percentComplete=percentComplete+20;
+            var consumer_key=jQuery('#consumer_key').val();
+            var consumer_secret=jQuery('#consumer_secret').val();
+            var product_id=jQuery('#product_id').val();
+            var post_status=jQuery('#product_statuss').val();
+            var error_ms='';
+            if(consumer_key=='' || consumer_secret=='' || product_id=='')
+            {
+               jQuery('.show_notice').html('');
+               error_ms='<div class="notice notice-warning is-dismissible my_notice"><p><strong>SUCCESS: </strong>Fields are Empty</p><button type="button" class="notice-dismiss" onclick="dissmiss_notice(this);"><span class="screen-reader-text">Dismiss this notice.</span></button></div>';
+               jQuery('.show_notice').html(error_ms);
+           }
+           else
+           {
+              jQuery('.show_notice').html('');
+              jQuery('#overlayone').append('<div id="overlay"><img id="overlay_img" src="http://localhost/web/practice/wp-content/uploads/2023/02/loading.gif" /></div>');
+              jQuery.ajax({
 
-    var consumer_key=jQuery('#consumer_key').val();
-    var consumer_secret=jQuery('#consumer_secret').val();
-    var product_id=jQuery('#product_id').val();
-    var error_ms='';
-    if(consumer_key=='' || consumer_secret=='' || product_id=='')
-    {
-       jQuery('.show_notice').html('');
-       error_ms='<div class="notice notice-warning is-dismissible my_notice"><p><strong>SUCCESS: </strong>Fields are Empty</p><button type="button" class="notice-dismiss" onclick="dissmiss_notice(this);"><span class="screen-reader-text">Dismiss this notice.</span></button></div>';
-       jQuery('.show_notice').html(error_ms);
-   }
-   else
-   {
-      jQuery('.show_notice').html('');
-      jQuery('#overlayone').append('<div id="overlay"><img id="overlay_img" src="http://localhost/web/practice/wp-content/uploads/2023/02/loading.gif" /></div>');
-      jQuery.ajax({
+                url  : 'admin-ajax.php',
+                type :  'post',
+                data :{
+                   'action'        : 'get_product_by_id',
+                   consumer_key    : consumer_key,
+                   consumer_secret : consumer_secret,
+                   product_id      : product_id,
+                   post_status     : post_status
 
-        url  : 'admin-ajax.php',
-        type :  'post',
-        data :{
-           'action'        : 'get_product_by_id',
-           consumer_key    : consumer_key,
-           consumer_secret : consumer_secret,
-           product_id      : product_id
+               },
+             success:function(result)
+             {
+                if(result)
+                {
+                    jQuery('#overlayone').html(' ');
+                }
+               jQuery('.progress').hide();
+               var msg='';
+               if(result.success== false)
+               {
+                   
+                   msg = '<div class="notice notice-warning is-dismissible my_notice"><p><strong>SUCCESS: </strong>Product Already Exists</p><button type="button" class="notice-dismiss"><span class="screen-reader-text">Dismiss this notice.</span></button></div>';
+                   
+               }
+               else if(result.data == true)
+               {
+                     
+                    msg = '<div class="notice notice-success is-dismissible my_notice"><p><strong>SUCCESS: </strong>Product Imported successfully</p><button type="button" class="notice-dismiss"><span class="screen-reader-text">Dismiss this notice.</span></button></div>';
+                 
+               }
 
-       },
-       beforeSend:function()
-       {
-         jQuery('.progress').show();
-         var percentVal= "0%";
-         jQuery('.bar').css("width",percentVal);
-     },
-     uploadProgress:function(event,position,total,percentComplete)
-     {
-         var percentVal = percentComplete +"%";
-         // console.log(percentVal);
-         jQuery('.bar').css("width",percentVal);
-     },
-     success:function(result)
-     {
-       jQuery('.progress').hide();
-       var msg='';
-       if(result.data == "product already exists")
-       {
-           jQuery('#overlayone').html(' ');
-           msg = '<div class="notice notice-warning is-dismissible my_notice"><p><strong>SUCCESS: </strong>Product Already Exists</p><button type="button" class="notice-dismiss"><span class="screen-reader-text">Dismiss this notice.</span></button></div>';
-           
-       }
-       else if(result.data == "single product inserted'")
-       {
-            msg = '<div class="notice notice-success is-dismissible my_notice"><p><strong>SUCCESS: </strong>Product Imported successfully</p><button type="button" class="notice-dismiss"><span class="screen-reader-text">Dismiss this notice.</span></button></div>';
-           jQuery('#overlayone').html(' ');
-       }
+                   jQuery('.show_notice').html(msg);
+               
+           } 
 
-           jQuery('.show_notice').html(msg);
-       
-   } 
-
-  });
-  }
-}
+          });
+          }
+        }
 });
 
 jQuery('.product-type').on('change', function(){

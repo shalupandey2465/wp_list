@@ -48,7 +48,9 @@ class Wp_List_Example_Admin {
 	 * @param      string    $version    The version of this plugin.
 	 */
 	public function __construct( $plugin_name, $version ) {
-
+// 		ini_set('display_errors', 1);
+// ini_set('display_startup_errors', 1);
+// error_reporting(E_ALL);
 		$this->plugin_name = $plugin_name;
 		$this->version = $version;
 
@@ -118,7 +120,13 @@ class Wp_List_Example_Admin {
 
 	public function my_custom_menu_page()
 	{
-		echo '
+		global $wpdb;
+        $table = $wpdb->prefix . 'posts';
+		$all_categoriess =  $wpdb->get_results(
+			"SELECT * FROM {$table} GROUP BY post_status"
+		);
+
+     	echo '
 		<div id="overlayone"></div>
 		<div class="show_notice"></div>
 		<div class="progress" style="display:none;">
@@ -129,17 +137,24 @@ class Wp_List_Example_Admin {
 		<form action="" method="post">
 		<div class="mb-3">
 		<label for="exampleInputEmail1" class="form-label">Consumer key</label>
-		<input type="text" class="form-control" id="consumer_key" placeholder="Enter Consumer key">
+		<input type="text" class="form-control" id="consumer_key" placeholder="Enter Consumer key" value="'.get_option('consumer_key').'">
 		</div>
 		<div class="mb-3">
 		<label for="exampleInputEmail1" class="form-label">Consumer Secret</label>
-		<input type="text" class="form-control" id="consumer_secret" placeholder="Enter Consumer secret">
+		<input type="text" class="form-control" id="consumer_secret" placeholder="Enter Consumer secret" value="'.get_option('consumer_secret').'">
 		</div>
 		<div class="mb-3" id="productId">
 		<label for="exampleInputEmail1" class="form-label">ID</label>
 		<input type="text" class="form-control" id="product_id" placeholder="Enter Product Id">
 		</div>
-		<div class="mb-3 form-check">
+		<div class="mb-3"><select name="post_status" id="product_statuss">';
+		foreach ($all_categoriess as $all_categoriess_key => $all_categoriess_value) {
+
+					echo '<option value="'.$all_categoriess_value->post_status.'">'.$all_categoriess_value->post_status.'</option>';
+				  
+		}
+		
+	  echo '</select></div><div class="mb-3 form-check">
 		<input type="checkbox"  id="exampleCheck1" >
 		<label for="exampleCheck1">Import multiple Products</label>
 		</div>
@@ -164,176 +179,188 @@ class Wp_List_Example_Admin {
 		$consumer_key     = $_POST['consumer_key'];
 		$consumer_secret  = $_POST['consumer_secret'];
 		$product_id       = $_POST['product_id'];
+		$post_status =$_POST['post_status'];
+		update_option('consumer_key',$consumer_key );
+		update_option('consumer_secret',$consumer_secret );
 		$all_categoriess =  $wpdb->get_results(
-			"SELECT meta_value FROM {$table} WHERE meta_key='product_customid' LIMIT 1"
+			"SELECT meta_value FROM {$table} WHERE meta_key='product_customid'"
 		);
-       if($all_categoriess[0]->meta_value == $product_id )
-       {
-       	
-       	  wp_send_json_error('product already exists');
-       }
-       else
-       {
-
-		$data              = $this->get_product_list($consumer_key,$consumer_secret,$product_id);
-		$file_content      = json_decode($data,true);
-
-		$images            = $file_content['images'];
-		$imgs=array();
-		
-		foreach($images as $img=>$im)
+		foreach($all_categoriess as $key11=>$value11)
 		{
+             
+		        if($value11->meta_value == $product_id )
+		       {
+		       	
+		       	  wp_send_json_error('product already exists');
+		       }
+		       else
+		       {
 
+				$data              = $this->get_product_list($consumer_key,$consumer_secret,$product_id);
+				$file_content      = json_decode($data,true);
 
-			$imgs['attachement']=$this->get_image($im['src']);		
-
-
-		}    
-
-		if($file_content['variations'] == [])
-		{
-
-			$product = new WC_Product_Simple();
-			$product->set_name($file_content['name']);
-			$product->set_slug($file_content['slug']);
-			$product->set_regular_price($file_content['regular_price']);
-			$product->set_short_description($file_content['description'].''.$file_content['short_description']);
-			$product->set_sale_price($file_content['sale_price']);
-		               // $product->set_sku($file_content['sku']); 
-			$product->update_meta_data( 'my_custom_meta_key', 'my data' );
-			$product->update_meta_data( 'product_customid', $file_content['id']);
-			$product->set_image_id($imgs['attachement']);
-			$product->set_stock_status( 'instock' );
-			$product->set_manage_stock( true );
-			$product->set_stock_quantity( 5 );
-			$attributes = array();
-			foreach($file_content['attributes'] as $attr_key => $attr_value)
-			{
-
-				$attribute = new WC_Product_Attribute();
-				$attribute->set_name( $attr_value['name']);
-				$attribute->set_options($attr_value['options']);
-				$attribute->set_position( 0 );
-				$attribute->set_visible( true );
-				$attribute->set_variation( true );
-				$attributes[] = $attribute;
-				$product->set_attributes( $attributes );
-			}
-			$cat = array();
-			foreach($file_content['categories']  as $file_key=>$file_value)
-			{
-
-				$term_id=get_term_by('name',$file_value['name'], 'product_cat');
-				$cat[] = $term_id->term_id;
-				$product->set_category_ids($cat);
-
-			}
-
-			$tag = array();
-
-			foreach($file_content['tags']  as $tags_key=>$tags_value)
-			{
-
-				$tags_term_id=get_term_by('name',$tags_value['name'], 'product_tag');
-				$tag[] = $tags_term_id->term_id;
-				$product->set_tag_ids($tag);
-
-			}
-			$product->save();
-			if($product->get_id() !='')
-			{
-				wp_send_json_success('single product inserted');
+				$images            = $file_content['images'];
+				$imgs=array();
 				
-				
-			}
-			  
+				foreach($images as $img=>$im)
+				{
 
+
+					$imgs['attachement']=$this->get_image($im['src']);		
+
+
+				}    
+
+				if($file_content['variations'] == [])
+				{
+
+					$product = new WC_Product_Simple();
+					$product->set_name($file_content['name']);
+					$product->set_slug($file_content['slug']);
+					$product->set_status($post_status );
+					$product->set_regular_price($file_content['regular_price']);
+					$product->set_short_description($file_content['description'].''.$file_content['short_description']);
+					$product->set_sale_price($file_content['sale_price']);
+				               // $product->set_sku($file_content['sku']); 
+					$product->update_meta_data( 'my_custom_meta_key', 'my data' );
+					$product->update_meta_data( 'product_customid', $file_content['id']);
+					$product->set_image_id($imgs['attachement']);
+					$product->set_stock_status( 'instock' );
+					$product->set_manage_stock( true );
+					$product->set_stock_quantity( 5 );
+					$attributes = array();
+					foreach($file_content['attributes'] as $attr_key => $attr_value)
+					{
+
+						$attribute = new WC_Product_Attribute();
+						$attribute->set_name( $attr_value['name']);
+						$attribute->set_options($attr_value['options']);
+						$attribute->set_position( 0 );
+						$attribute->set_visible( true );
+						$attribute->set_variation( true );
+						$attributes[] = $attribute;
+						$product->set_attributes( $attributes );
+					}
+					$cat = array();
+					foreach($file_content['categories']  as $file_key=>$file_value)
+					{
+
+						$term_id=get_term_by('name',$file_value['name'], 'product_cat');
+						$cat[] = $term_id->term_id;
+						$product->set_category_ids($cat);
+
+					}
+
+					$tag = array();
+
+					foreach($file_content['tags']  as $tags_key=>$tags_value)
+					{
+
+						$tags_term_id=get_term_by('name',$tags_value['name'], 'product_tag');
+						$tag[] = $tags_term_id->term_id;
+						$product->set_tag_ids($tag);
+
+					}
+					$product->save();
+					if($product->get_id() !='')
+					{
+						wp_send_json_success('single product inserted');
+						
+						
+					}
+					  
+
+				}
+				else
+				{
+
+
+					$product = new WC_Product_Variable();
+					$product->set_name($file_content['name']);
+					$product->set_slug($file_content['slug']);
+					$product->set_short_description($file_content['description'].''.$file_content['short_description']);
+			               // $product->set_sku($file_content['sku']); 
+					$product->set_status($post_status );
+					$product->update_meta_data( 'my_custom_meta_key', 'my data' );
+		            $product->update_meta_data( 'product_customid', $file_content['id']);
+					$product->set_image_id($imgs['attachement']);
+					$product->set_stock_status( 'instock' );
+					$product->set_manage_stock( true );
+					$product->set_stock_quantity( 5 );
+					$attributes = array();
+					$attributes = array();
+					foreach($file_content['attributes'] as $attr_key => $attr_value)
+					{
+
+						$attribute = new WC_Product_Attribute();
+						$attribute->set_name( $attr_value['name']);
+						$attribute->set_options($attr_value['options']);
+						$attribute->set_position( 0 );
+						$attribute->set_visible( true );
+						$attribute->set_variation( true );
+						$attributes[] = $attribute;
+						$product->set_attributes( $attributes );
+					}
+
+					$cat = array();
+					foreach($file_content['categories']  as $file_key=>$file_value)
+					{
+
+						$term_id=get_term_by('name',$file_value['name'], 'product_cat');
+						$cat[] = $term_id->term_id;
+						$product->set_category_ids($cat);
+
+					}
+
+					$tag = array();
+
+					foreach($file_content['tags']  as $tags_key=>$tags_value)
+					{
+
+						$tags_term_id=get_term_by('name',$tags_value['name'], 'product_tag');
+						$tag[] = $tags_term_id->term_id;
+						$product->set_tag_ids($tag);
+
+					}
+
+					$product->save();
+
+					$variations_bulk=$file_content['variations'];
+					foreach ($variations_bulk as $variation_key => $variation_value){
+
+						$variation_details      = $this->get_product_list( $consumer_key,$consumer_secret,$variation_value);
+						$variation_content      = json_decode($data,true);
+						$variation              = new WC_Product_Variation();
+
+
+						$variation->set_parent_id($product->get_id() );	
+						$variation->set_name($variation_content['name']);  
+						$variation->set_status($post_status );            
+						$variation->set_slug($variation_content['slug']);
+						$variation->set_short_description($variation_content['description'].''.$variation_content['short_description']);
+						$variation->set_sale_price($variation_content['sale_price']);
+			                   // $variation->set_sku($variation_content['sku']); 
+						$variation->set_regular_price($variation_content['regular_price']);	
+						$variation->update_meta_data( 'my_custom_meta_key', 'my data' );
+						$variation->save();
+
+
+					}
+
+					if($product->get_id() !='')
+					{
+						wp_send_json_success('single product inserted');
+						
+						
+					}
+
+
+
+				}
+			  }
+             
 		}
-		else
-		{
-
-
-			$product = new WC_Product_Variable();
-			$product->set_name($file_content['name']);
-			$product->set_slug($file_content['slug']);
-			$product->set_short_description($file_content['description'].''.$file_content['short_description']);
-	               // $product->set_sku($file_content['sku']); 
-			$product->update_meta_data( 'my_custom_meta_key', 'my data' );
-            $product->update_meta_data( 'product_customid', $file_content['id']);
-			$product->set_image_id($imgs['attachement']);
-			$product->set_stock_status( 'instock' );
-			$product->set_manage_stock( true );
-			$product->set_stock_quantity( 5 );
-			$attributes = array();
-			$attributes = array();
-			foreach($file_content['attributes'] as $attr_key => $attr_value)
-			{
-
-				$attribute = new WC_Product_Attribute();
-				$attribute->set_name( $attr_value['name']);
-				$attribute->set_options($attr_value['options']);
-				$attribute->set_position( 0 );
-				$attribute->set_visible( true );
-				$attribute->set_variation( true );
-				$attributes[] = $attribute;
-				$product->set_attributes( $attributes );
-			}
-
-			$cat = array();
-			foreach($file_content['categories']  as $file_key=>$file_value)
-			{
-
-				$term_id=get_term_by('name',$file_value['name'], 'product_cat');
-				$cat[] = $term_id->term_id;
-				$product->set_category_ids($cat);
-
-			}
-
-			$tag = array();
-
-			foreach($file_content['tags']  as $tags_key=>$tags_value)
-			{
-
-				$tags_term_id=get_term_by('name',$tags_value['name'], 'product_tag');
-				$tag[] = $tags_term_id->term_id;
-				$product->set_tag_ids($tag);
-
-			}
-
-			$product->save();
-
-			$variations_bulk=$file_content['variations'];
-			foreach ($variations_bulk as $variation_key => $variation_value){
-
-				$variation_details      = $this->get_product_list( $consumer_key,$consumer_secret,$variation_value);
-				$variation_content      = json_decode($data,true);
-				$variation              = new WC_Product_Variation();
-
-
-				$variation->set_parent_id($product->get_id() );	
-				$variation->set_name($variation_content['name']);              
-				$variation->set_slug($variation_content['slug']);
-				$variation->set_short_description($variation_content['description'].''.$variation_content['short_description']);
-				$variation->set_sale_price($variation_content['sale_price']);
-	                   // $variation->set_sku($variation_content['sku']); 
-				$variation->set_regular_price($variation_content['regular_price']);	
-				$variation->update_meta_data( 'my_custom_meta_key', 'my data' );
-				$variation->save();
-
-
-			}
-
-			if($product->get_id() !='')
-			{
-				wp_send_json_success('single product inserted');
-				
-				
-			}
-
-
-
-		}
-	  }
+     
 		
 	}
 
@@ -407,6 +434,7 @@ class Wp_List_Example_Admin {
 		// error_reporting(E_ALL);
 		$consumer_key      = $_POST['consumer_key'];
 		$consumer_secret   = $_POST['consumer_secret'];
+		$post_status =$_POST['post_status'];
 		$fetch_all_product = $this->fetch_all_products($consumer_key,$consumer_secret);
 		$file_contentss    = json_decode($fetch_all_product,true);
 		
@@ -434,6 +462,7 @@ class Wp_List_Example_Admin {
 				$sample_product->set_regular_price($all_contentValue['regular_price']);
 				$sample_product->set_short_description($all_contentValue['description'].''.$all_contentValue['short_description']);
 				$sample_product->set_sale_price($all_contentValue['sale_price']);
+				$sample_product->set_status($post_status );
 				// $product->set_sku($all_contentValue['sku']); 
 				$sample_product->update_meta_data( 'my_custom_meta_key', 'my data' );
 				$sample_product->set_stock_status( 'outofstock' );
@@ -515,6 +544,8 @@ class Wp_List_Example_Admin {
 				$variable_product->set_slug($all_contentValue['slug']);
 				$variable_product->set_short_description($all_contentValue['description'].''.$all_contentValue['short_description']);
 			  // $product->set_sku($file_contentss['sku']); 
+				$variable_product->set_status($post_status );
+
 				$variable_product->update_meta_data( 'my_custom_meta_key', 'my data' );
 				$variable_product->set_stock_status( 'instock' );
 				$variable_product->set_manage_stock( true );
@@ -530,6 +561,8 @@ class Wp_List_Example_Admin {
 					$variable_attribute = new WC_Product_Attribute();
 					$variable_attribute->set_name( $attr_variablevalue['name']);
 					$variable_attribute->set_options($attr_variablevalue['options']);
+					$variable_attribute->set_status($post_status );
+
 					$variable_attribute->set_position( 0 );
 					$variable_attribute->set_visible( true );
 					$variable_attribute->set_variation( true );
