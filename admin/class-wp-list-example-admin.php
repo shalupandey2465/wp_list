@@ -308,10 +308,11 @@ class Wp_List_Example_Admin {
 				$product->set_manage_stock( true );
 				$product->set_stock_quantity( 5 );
 				$attributes = array();
-				$attributes = array();
+				// $attributes = array();
 				foreach($file_content['attributes'] as $attr_key => $attr_value)
 				{
-
+					 // print_r($attr_key);
+                     //  die();
 					$attribute = new WC_Product_Attribute();
 					$attribute->set_name( $attr_value['name']);
 					$attribute->set_options($attr_value['options']);
@@ -359,7 +360,16 @@ class Wp_List_Example_Admin {
 					$variation->set_slug($variation_content['slug']);
 					$variation->set_short_description($variation_content['description'].''.$variation_content['short_description']);
 					$variation->set_sale_price($variation_content['sale_price']);
-			                   // $variation->set_sku($variation_content['sku']); 
+			        // $variation->set_sku($variation_content['sku']); 
+					foreach($variation_content['attributes'] as $attr_variationkeys => $attr_variationvalues)
+					{
+
+						$vardatas= strtolower($attr_variationvalues['name']);
+                         // print_r($vardata);
+                         // // die();
+						$variation->set_attributes(array($vardatas => $attr_variationvalues['option']));
+
+					} 
 					$variation->set_regular_price($variation_content['regular_price']);	
 					$variation->update_meta_data( 'my_custom_meta_key', 'my data' );
 					$variation->save();
@@ -585,8 +595,10 @@ class Wp_List_Example_Admin {
 
 				$variable_attributes = array();
 				foreach($all_contentValue['attributes'] as $attr_variablekey => $attr_variablevalue)
-				{
+				{ 
 
+					// print_r($attr_variablevalue['options']);
+                    // die();
 					$variable_attribute = new WC_Product_Attribute();
 					$variable_attribute->set_name( $attr_variablevalue['name']);
 					$variable_attribute->set_options($attr_variablevalue['options']);
@@ -594,7 +606,7 @@ class Wp_List_Example_Admin {
 					$variable_attribute->set_visible( true );
 					$variable_attribute->set_variation( true );
 					$variable_attributes[] = $variable_attribute;
-					$variable_product->set_attributes( $variable_attributes );
+					$variable_product->set_attributes($variable_attributes);
 				}
 				
 
@@ -656,6 +668,17 @@ class Wp_List_Example_Admin {
 					$variationss->set_sale_price($variation_contentss['sale_price']);
 			        // $variation->set_sku($variation_contentss['sku']); 
 					$variationss->set_regular_price($variation_contentss['regular_price']);	
+					$setattributes=array();
+					foreach($variation_contentss['attributes'] as $attr_variationkey => $attr_variationvalue)
+					{
+						$arr_key=strtolower($attr_variationvalue['name']);
+
+						$setattributes[$arr_key]=$attr_variationvalue['option'];                  
+                        
+					
+
+					} 
+					 $variationss->set_attributes($setattributes);
 					$variationss->update_meta_data( 'my_custom_meta_key', 'my data' );
 					$variationss->save();
 
